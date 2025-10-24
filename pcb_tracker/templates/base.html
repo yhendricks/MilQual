@@ -16,25 +16,21 @@
                     {% for group in user.groups.all %}
                         {% if group.name == 'board_tester_lvl1' or group.name == 'board_tester_lvl2' %}
                             <a class="nav-link" href="{% url 'pcb_test' %}">Test PCB</a>
-                            {% break %}
                         {% endif %}
                     {% endfor %}
                     {% for group in user.groups.all %}
                         {% if group.name == 'assembler_lvl1' %}
                             <a class="nav-link" href="{% url 'module_assemble' %}">Assemble Module</a>
-                            {% break %}
                         {% endif %}
                     {% endfor %}
                     {% for group in user.groups.all %}
                         {% if 'Function_tester' in group.name or 'Environmental_tester' in group.name %}
                             <a class="nav-link" href="{% url 'module_functional_test' %}">Test Module</a>
-                            {% break %}
                         {% endif %}
                     {% endfor %}
                     {% for group in user.groups.all %}
                         {% if 'Manager' in group.name %}
                             <a class="nav-link" href="{% url 'module_sign_off' %}">Sign Off</a>
-                            {% break %}
                         {% endif %}
                     {% endfor %}
                 {% endif %}

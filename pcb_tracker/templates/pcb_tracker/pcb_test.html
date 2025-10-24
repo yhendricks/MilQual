@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Test PCB - MilQual{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Test PCB</h1>
+        <p class="lead">Enter test measurements for a PCB</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <h3>Enter Test Data</h3>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="{{ form.pcb_serial.id_for_label }}" class="form-label">PCB Serial Number</label>
+                {{ form.pcb_serial }}
+                {% if form.pcb_serial.errors %}
+                    <div class="text-danger">{{ form.pcb_serial.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.voltage.id_for_label }}" class="form-label">Voltage (V)</label>
+                {{ form.voltage }}
+                {% if form.voltage.errors %}
+                    <div class="text-danger">{{ form.voltage.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.current.id_for_label }}" class="form-label">Current (A)</label>
+                {{ form.current }}
+                {% if form.current.errors %}
+                    <div class="text-danger">{{ form.current.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.temperature.id_for_label }}" class="form-label">Temperature (°C)</label>
+                {{ form.temperature }}
+                {% if form.temperature.errors %}
+                    <div class="text-danger">{{ form.temperature.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.other_measurements.id_for_label }}" class="form-label">Other Measurements (JSON)</label>
+                {{ form.other_measurements }}
+                <div class="form-text">Enter additional measurements in JSON format, e.g., {"frequency": 1.2, "power": 5.0}</div>
+                {% if form.other_measurements.errors %}
+                    <div class="text-danger">{{ form.other_measurements.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                    <div class="text-danger">{{ form.notes.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <h4>Attach File (.xlsx)</h4>
+            <div class="mb-3">
+                <label for="{{ attachment_form.file.id_for_label }}" class="form-label">Excel File</label>
+                {{ attachment_form.file }}
+                {% if attachment_form.file.errors %}
+                    <div class="text-danger">{{ attachment_form.file.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ attachment_form.description.id_for_label }}" class="form-label">File Description</label>
+                {{ attachment_form.description }}
+                {% if attachment_form.description.errors %}
+                    <div class="text-danger">{{ attachment_form.description.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Submit Test Data</button>
+        </form>
+    </div>
+    
+    <div class="col-md-6">
+        <h3>Pending PCBs for Testing</h3>
+        {% if pending_pcbs %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Serial Number</th>
+                            <th>Batch</th>
+                            <th>Date Added</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pcb in pending_pcbs %}
+                        <tr>
+                            <td>{{ pcb.serial_number }}</td>
+                            <td>{{ pcb.batch.batch_number }}</td>
+                            <td>{{ pcb.created_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-primary" 
+                                        onclick="document.getElementById('{{ form.pcb_serial.id_for_label }}').value='{{ pcb.serial_number }}'">
+                                    Select
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">No PCBs are currently pending testing.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

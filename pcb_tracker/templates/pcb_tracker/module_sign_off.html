@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Module Sign Off - MilQual{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Module Sign Off</h1>
+        <p class="lead">Review and approve completed modules</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h3>Completed Modules</h3>
+        {% if completed_modules %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Module Serial</th>
+                            <th>Assembler</th>
+                            <th>Assembly Date</th>
+                            <th>Status</th>
+                            <th>PCBs Count</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for module in completed_modules %}
+                        <tr>
+                            <td>{{ module.module_serial_number }}</td>
+                            <td>{{ module.assembler.username }}</td>
+                            <td>{{ module.assembly_date|date:"M d, Y" }}</td>
+                            <td><span class="badge bg-success">{{ module.get_status_display }}</span></td>
+                            <td>{{ module.pcbs.count }}</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-primary">Review</a>
+                                <a href="#" class="btn btn-sm btn-success">Sign Off</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">No modules are currently completed and ready for sign off.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

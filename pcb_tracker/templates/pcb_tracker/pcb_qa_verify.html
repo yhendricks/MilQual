@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify PCB - MilQual{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Verify PCB Test Results</h1>
+        <p class="lead">Review and approve test results for PCB {{ pcb.serial_number }}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>PCB Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Serial Number:</strong> {{ pcb.serial_number }}</p>
+                <p><strong>Batch:</strong> {{ pcb.batch.batch_number }}</p>
+                <p><strong>Status:</strong> {{ pcb.get_status_display }}</p>
+                <p><strong>Created:</strong> {{ pcb.created_at|date:"M d, Y H:i" }}</p>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Test Measurements</h5>
+            </div>
+            <div class="card-body">
+                {% if measurements %}
+                    {% for measurement in measurements %}
+                        <div class="mb-3">
+                            <p><strong>Date:</strong> {{ measurement.test_date|date:"M d, Y H:i" }}</p>
+                            <p><strong>Tester:</strong> {{ measurement.tester.username }}</p>
+                            <p><strong>Voltage:</strong> {{ measurement.voltage|default:"N/A" }} V</p>
+                            <p><strong>Current:</strong> {{ measurement.current|default:"N/A" }} A</p>
+                            <p><strong>Temperature:</strong> {{ measurement.temperature|default:"N/A" }} °C</p>
+                            {% if measurement.other_measurements %}
+                                <p><strong>Other:</strong> {{ measurement.other_measurements }}</p>
+                            {% endif %}
+                            {% if measurement.notes %}
+                                <p><strong>Notes:</strong> {{ measurement.notes }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No measurements found for this PCB.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Attached Files</h5>
+            </div>
+            <div class="card-body">
+                {% if attachments %}
+                    <ul class="list-group">
+                        {% for attachment in attachments %}
+                            <li class="list-group-item">
+                                <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.file.name|basename }}</a>
+                                <p class="text-muted small mb-0">{{ attachment.description|default:"No description" }}</p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No files attached.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <p>Are you sure you want to verify and approve this PCB's test results?</p>
+                    <button type="submit" class="btn btn-success">Approve PCB</button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

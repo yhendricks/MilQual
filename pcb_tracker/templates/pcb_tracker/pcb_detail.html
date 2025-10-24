@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}PCB Detail - {{ pcb.serial_number }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>PCB Detail: {{ pcb.serial_number }}</h1>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>PCB Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Serial Number:</strong> {{ pcb.serial_number }}</p>
+                <p><strong>Batch:</strong> {{ pcb.batch.batch_number }}</p>
+                <p><strong>Status:</strong> <span class="badge bg-{% if pcb.status == 'completed' %}success{% elif pcb.status == 'pending' %}warning{% else %}primary{% endif %}">{{ pcb.get_status_display }}</span></p>
+                <p><strong>Created:</strong> {{ pcb.created_at|date:"M d, Y H:i" }}</p>
+                <p><strong>Updated:</strong> {{ pcb.updated_at|date:"M d, Y H:i" }}</p>
+                {% if pcb.notes %}
+                    <p><strong>Notes:</strong> {{ pcb.notes }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Test Measurements</h5>
+            </div>
+            <div class="card-body">
+                {% if measurements %}
+                    {% for measurement in measurements %}
+                        <div class="mb-3 p-2 border rounded">
+                            <p><strong>Date:</strong> {{ measurement.test_date|date:"M d, Y H:i" }}</p>
+                            <p><strong>Tester:</strong> {{ measurement.tester.username }}</p>
+                            <p><strong>Voltage:</strong> {{ measurement.voltage|default:"N/A" }} V</p>
+                            <p><strong>Current:</strong> {{ measurement.current|default:"N/A" }} A</p>
+                            <p><strong>Temperature:</strong> {{ measurement.temperature|default:"N/A" }} °C</p>
+                            {% if measurement.other_measurements %}
+                                <p><strong>Other:</strong> {{ measurement.other_measurements }}</p>
+                            {% endif %}
+                            {% if measurement.notes %}
+                                <p><strong>Notes:</strong> {{ measurement.notes }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No measurements recorded for this PCB.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Attached Files</h5>
+            </div>
+            <div class="card-body">
+                {% if attachments %}
+                    <ul class="list-group">
+                        {% for attachment in attachments %}
+                            <li class="list-group-item">
+                                <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.file.name|basename }}</a>
+                                <span class="badge bg-secondary">{{ attachment.get_file_type_display }}</span>
+                                <p class="text-muted small mb-0">{{ attachment.description|default:"No description" }}</p>
+                                <small class="text-muted">Uploaded by {{ attachment.uploaded_by.username }} on {{ attachment.upload_date|date:"M d, Y H:i" }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No files attached to this PCB.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if modules %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>Modules Containing This PCB</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    {% for module in modules %}
+                        <li class="list-group-item">
+                            <a href="#">{{ module.module_serial_number }}</a>
+                            <p class="text-muted small mb-0">Assembled on {{ module.assembly_date|date:"M d, Y" }}</p>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

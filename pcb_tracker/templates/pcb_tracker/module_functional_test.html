@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Test Module - MilQual{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Test Module</h1>
+        <p class="lead">Record functional test results for a module</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <h3>Module Test Form</h3>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="{{ form.module.id_for_label }}" class="form-label">Module Serial Number</label>
+                {{ form.module }}
+                {% if form.module.errors %}
+                    <div class="text-danger">{{ form.module.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.result.id_for_label }}" class="form-label">Test Result</label>
+                {{ form.result }}
+                {% if form.result.errors %}
+                    <div class="text-danger">{{ form.result.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                    <div class="text-danger">{{ form.notes.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="file" class="form-label">Attach Test Report (.xlsx)</label>
+                <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls">
+            </div>
+            
+            <div class="mb-3">
+                <label for="file_description" class="form-label">File Description</label>
+                <textarea class="form-control" id="file_description" name="file_description" rows="2"></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Submit Test Results</button>
+        </form>
+    </div>
+    
+    <div class="col-md-6">
+        <h3>Available Modules for Testing</h3>
+        {% if available_modules %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Module Serial</th>
+                            <th>Assembler</th>
+                            <th>Assembly Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for module in available_modules %}
+                        <tr>
+                            <td>{{ module.module_serial_number }}</td>
+                            <td>{{ module.assembler.username }}</td>
+                            <td>{{ module.assembly_date|date:"M d, Y" }}</td>
+                            <td><span class="badge bg-primary">{{ module.get_status_display }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">No modules are currently available for functional testing.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

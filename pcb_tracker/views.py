@@ -334,6 +334,12 @@ def batch_manage(request):
             batch_id = request.POST.get('batch_id')
             batch = get_object_or_404(Batch, id=batch_id)
             batch_number = batch.batch_number
+            
+            # Check if the batch has any PCBs associated with it
+            if batch.pcbs.count() > 0:
+                messages.error(request, f'Cannot delete batch {batch_number} because it contains {batch.pcbs.count()} PCB(s). Remove PCBs first.')
+                return redirect('batch_manage')
+            
             batch.delete()
             messages.success(request, f'Batch {batch_number} deleted successfully!')
             return redirect('batch_manage')

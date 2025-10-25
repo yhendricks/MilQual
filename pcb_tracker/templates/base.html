@@ -43,6 +43,20 @@
                             </li>
                         {% endif %}
                     {% endfor %}
+                    
+                    {% for group in user.groups.all %}
+                        {% if group.name == 'manage_pcb_type' %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="managePcbTypesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Manage PCB Types
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="managePcbTypesDropdown">
+                                    <li><a class="dropdown-item" href="{% url 'pcb_type_create' %}">Create PCB Type</a></li>
+                                    <li><a class="dropdown-item" href="/admin/pcb_tracker/pcbtype/">Manage in Admin</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
                 {% endif %}
                 {% if user.is_staff %}
                     <a class="nav-link" href="/admin/">Admin</a>

@@ -41,34 +41,43 @@
                                 <li><a class="dropdown-item" href="/admin/pcb_tracker/batch/">Manage Batches (Admin)</a></li>
                                 <li><a class="dropdown-item" href="/admin/pcb_tracker/pcb/">Manage PCBs (Admin)</a></li>
                                 <li><a class="dropdown-item" href="/admin/pcb_tracker/testmeasurement/">Manage Test Measurements (Admin)</a></li>
+                            {% elif user.groups.all %}
+                                <!-- Show to users with specific permissions -->
+                                {% for group in user.groups.all %}
+                                    {% if 'Manager' in group.name %}
+                                        <li><a class="dropdown-item" href="{% url 'pcb_type_manage' %}">Manage PCB Types</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'batch_manage' %}">Manage Batches</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'pcb_create' %}">Create PCB</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                    {% endif %}
+                                    
+                                    {% if group.name == 'manage_pcb_type' %}
+                                        <li><a class="dropdown-item" href="{% url 'pcb_type_manage' %}">Manage PCB Types</a></li>
+                                        <li><a class="dropdown-item" href="/admin/pcb_tracker/pcbtype/">Manage PCB Types</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                    {% endif %}
+                                    
+                                    {% if group.name == 'board_tester_lvl1' or group.name == 'board_tester_lvl2' %}
+                                        <li><a class="dropdown-item" href="{% url 'pcb_test' %}">Test PCB</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                <!-- Show Sign Off only to managers -->
+                                {% for group in user.groups.all %}
+                                    {% if 'Manager' in group.name %}
+                                        <li><a class="dropdown-item" href="{% url 'module_sign_off' %}">Sign Off Modules</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <!-- Show message for users with no groups -->
+                                <li class="dropdown-item-text text-muted">
+                                    <em>No workflow permissions assigned</em>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li class="dropdown-item-text text-muted">
+                                    <small>Please contact your administrator to assign workflow permissions.</small>
+                                </li>
                             {% endif %}
-                            
-                            <!-- Show to users with specific permissions -->
-                            {% for group in user.groups.all %}
-                                {% if 'Manager' in group.name %}
-                                    <li><a class="dropdown-item" href="{% url 'pcb_type_manage' %}">Manage PCB Types</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'batch_manage' %}">Manage Batches</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'pcb_create' %}">Create PCB</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                {% endif %}
-                                
-                                {% if group.name == 'manage_pcb_type' %}
-                                    <li><a class="dropdown-item" href="{% url 'pcb_type_manage' %}">Manage PCB Types</a></li>
-                                    <li><a class="dropdown-item" href="/admin/pcb_tracker/pcbtype/">Manage PCB Types (Admin)</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                {% endif %}
-                                
-                                {% if group.name == 'board_tester_lvl1' or group.name == 'board_tester_lvl2' %}
-                                    <li><a class="dropdown-item" href="{% url 'pcb_test' %}">Test PCB</a></li>
-                                {% endif %}
-                            {% endfor %}
-                            
-                            <!-- Show Sign Off only to managers -->
-                            {% for group in user.groups.all %}
-                                {% if 'Manager' in group.name %}
-                                    <li><a class="dropdown-item" href="{% url 'module_sign_off' %}">Sign Off Modules</a></li>
-                                {% endif %}
-                            {% endfor %}
                         </ul>
                     </li>
                 {% endif %}

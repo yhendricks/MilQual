@@ -122,11 +122,11 @@
                     <div class="mb-3">
                         <label for="create_pcb_type" class="form-label">PCB Type</label>
                         <select class="form-select" id="create_pcb_type" name="pcb_type" required>
-                            {% for pcb_type in form.pcb_type.queryset %}
+                            {% for pcb_type in pcb_types_for_modal %}
                                 <option value="{{ pcb_type.id }}">{{ pcb_type.name }}</option>
                             {% endfor %}
                         </select>
-                        {% if not form.pcb_type.queryset %}
+                        {% if not pcb_types_for_modal %}
                         <div class="text-warning mt-2">No PCB types available. Please create PCB types first.</div>
                         {% endif %}
                     </div>

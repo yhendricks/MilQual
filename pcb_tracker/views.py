@@ -349,9 +349,13 @@ def batch_manage(request):
     page_number = request.GET.get('page')
     batches_page = paginator.get_page(page_number)
     
+    # Pass PCB types directly to template context for modal
+    pcb_types_for_modal = PCBType.objects.all()
+    
     context = {
         'form': form,
         'batches': batches_page,
+        'pcb_types_for_modal': pcb_types_for_modal,
     }
     return render(request, 'pcb_tracker/batch_manage.html', context)
 

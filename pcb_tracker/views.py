@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden
 from django.core.exceptions import PermissionDenied
-from .models import PCB, Batch, TestMeasurement, FileAttachment, Module, ModuleTestRecord, PCBType
+from .models import PCB, Batch, TestMeasurement, FileAttachment, Module, ModuleTestRecord, PCBType, TestConfig, TestParameter, TestQuestion, ParameterMeasurement, QuestionResponse
 from .forms import PCBTestForm, FileAttachmentForm, ModuleAssemblyForm, ModuleTestForm, PCBCreateForm, BatchCreateForm, PCBTypeForm
 
 
@@ -188,42 +188,82 @@ def batch_manage(request):
 
 @login_required
 def pcb_test(request):
-    """View for board testers to enter PCB test measurements"""
+    """View for board testers to enter PCB test measurements based on test configuration"""
     if request.method == 'POST':
-        form = PCBTestForm(request.POST, user=request.user)
-        attachment_form = FileAttachmentForm(request.POST, request.FILES)
+        # First, check if we're submitting test data for a specific PCB
+        pcb_serial = request.POST.get('pcb_serial')
         
-        if form.is_valid() and attachment_form.is_valid():
-            pcb = form.cleaned_data['pcb']
-            
-            # Create the test measurement
-            measurement = TestMeasurement.objects.create(
-                pcb=pcb,
-                voltage=form.cleaned_data['voltage'],
-                current=form.cleaned_data['current'],
-                temperature=form.cleaned_data['temperature'],
-                other_measurements=form.cleaned_data['other_measurements'],
-                tester=request.user,
-                notes=form.cleaned_data['notes']
-            )
-            
-            # Handle file attachment if provided
-            if 'file' in request.FILES:
-                attachment = attachment_form.save(commit=False)
-                attachment.pcb = pcb
-                attachment.uploaded_by = request.user
-                attachment.file_type = 'pcb_test'
-                attachment.save()
-            
-            # Update PCB status
-            pcb.status = 'tested'
-            pcb.save()
-            
-            messages.success(request, f'PCB {pcb.serial_number} tested successfully!')
-            return redirect('pcb_test')
-    else:
-        form = PCBTestForm(user=request.user)
-        attachment_form = FileAttachmentForm()
+        if pcb_serial:
+            try:
+                pcb = PCB.objects.get(serial_number=pcb_serial, status='pending')
+                
+                # Create the main test measurement record
+                test_measurement = TestMeasurement.objects.create(
+                    pcb=pcb,
+                    test_config=pcb.test_config,
+                    tester=request.user,
+                    notes=request.POST.get('notes', '')
+                )
+                
+                # Process parameter measurements if PCB has a test config
+                if pcb.test_config:
+                    for parameter in pcb.test_config.parameters.all():
+                        param_value = request.POST.get(f'param_{parameter.id}')
+                        if param_value:
+                            try:
+                                value = float(param_value)
+                                ParameterMeasurement.objects.create(
+                                    test_measurement=test_measurement,
+                                    test_parameter=parameter,
+                                    value=value,
+                                    unit=parameter.unit
+                                )
+                            except ValueError:
+                                # Handle invalid numeric input
+                                messages.error(request, f'Invalid value for {parameter.name}')
+                                # Clean up partial data and continue
+                                test_measurement.delete()
+                                break
+                
+                # Process question responses if PCB has a test config
+                if pcb.test_config:
+                    for question in pcb.test_config.questions.all():
+                        response_value = request.POST.get(f'question_{question.id}')
+                        if response_value:
+                            try:
+                                response_bool = response_value.lower() == 'true'
+                                QuestionResponse.objects.create(
+                                    test_measurement=test_measurement,
+                                    test_question=question,
+                                    response=response_bool
+                                )
+                            except:
+                                # Handle invalid boolean input
+                                messages.error(request, f'Invalid response for question: {question.question_text}')
+                                # Clean up partial data and continue
+                                test_measurement.delete()
+                                break
+                
+                # Handle file attachment if provided
+                if request.FILES.get('file'):
+                    attachment = FileAttachment(
+                        pcb=pcb,
+                        file_type='pcb_test',
+                        file=request.FILES['file'],
+                        uploaded_by=request.user,
+                        description=request.POST.get('file_description', '')
+                    )
+                    attachment.save()
+                
+                # Update PCB status
+                pcb.status = 'tested'
+                pcb.save()
+                
+                messages.success(request, f'PCB {pcb.serial_number} tested successfully!')
+                return redirect('pcb_test')
+                
+            except PCB.DoesNotExist:
+                messages.error(request, 'PCB with this serial number does not exist or is not available for testing.')
     
     # Get PCBs that are pending testing with search and pagination
     search_query = request.GET.get('search', '')
@@ -239,8 +279,6 @@ def pcb_test(request):
     page_obj = paginator.get_page(page_number)
     
     context = {
-        'form': form,
-        'attachment_form': attachment_form,
         'pending_pcbs': page_obj,  # Paginated and filtered results
         'search_query': search_query,
     }

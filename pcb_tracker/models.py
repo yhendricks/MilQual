@@ -36,6 +36,23 @@ class Batch(models.Model):
         ordering = ['-production_date']
 
 
+class TestConfig(models.Model):
+    """
+    Model to define what tests should be performed on a PCB
+    """
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    pcb_type = models.ForeignKey(PCBType, on_delete=models.CASCADE, related_name='test_configs')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Test Config: {self.name} for {self.pcb_type.name}"
+    
+    class Meta:
+        ordering = ['-created_at']
+
+
 class PCB(models.Model):
     """
     Model to represent an individual PCB with its test status and workflow state
@@ -54,6 +71,7 @@ class PCB(models.Model):
     
     serial_number = models.CharField(max_length=100, unique=True)
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name='pcbs')
+    test_config = models.ForeignKey(TestConfig, on_delete=models.SET_NULL, null=True, blank=True, related_name='pcbs')
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -66,11 +84,58 @@ class PCB(models.Model):
         ordering = ['-created_at']
 
 
+class TestParameter(models.Model):
+    """
+    Model to define individual test parameters within a test config
+    """
+    PARAMETER_TYPES = [
+        ('voltage', 'Voltage'),
+        ('current', 'Current'),
+        ('frequency', 'Frequency'),
+        ('resistance', 'Resistance'),
+        ('temperature', 'Temperature'),
+        ('other', 'Other'),
+    ]
+    
+    test_config = models.ForeignKey(TestConfig, on_delete=models.CASCADE, related_name='parameters')
+    parameter_type = models.CharField(max_length=20, choices=PARAMETER_TYPES)
+    name = models.CharField(max_length=100)  # e.g., "Supply Voltage", "Operating Current"
+    description = models.TextField(blank=True)
+    min_value = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    max_value = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    unit = models.CharField(max_length=20, default="V")  # e.g., V, A, Hz, Ohm
+    required = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)  # For ordering parameters
+    
+    def __str__(self):
+        return f"{self.name} ({self.parameter_type})"
+    
+    class Meta:
+        ordering = ['order', 'name']
+
+
+class TestQuestion(models.Model):
+    """
+    Model to define yes/no questions within a test config
+    """
+    test_config = models.ForeignKey(TestConfig, on_delete=models.CASCADE, related_name='questions')
+    question_text = models.TextField()
+    required = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)  # For ordering questions
+    
+    def __str__(self):
+        return self.question_text
+    
+    class Meta:
+        ordering = ['order', 'question_text']
+
+
 class TestMeasurement(models.Model):
     """
     Model to store test measurements for a PCB
     """
     pcb = models.ForeignKey(PCB, on_delete=models.CASCADE, related_name='measurements')
+    test_config = models.ForeignKey(TestConfig, on_delete=models.CASCADE, related_name='test_measurements', null=True, blank=True)
     voltage = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
     current = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
     temperature = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
@@ -81,6 +146,40 @@ class TestMeasurement(models.Model):
     
     def __str__(self):
         return f"Measurements for {self.pcb.serial_number} - {self.test_date}"
+
+
+class ParameterMeasurement(models.Model):
+    """
+    Model to store individual parameter measurements according to test config
+    """
+    test_measurement = models.ForeignKey(TestMeasurement, on_delete=models.CASCADE, related_name='parameter_measurements')
+    test_parameter = models.ForeignKey(TestParameter, on_delete=models.CASCADE)
+    value = models.DecimalField(max_digits=15, decimal_places=6)
+    unit = models.CharField(max_length=20, blank=True)  # Override default unit if needed
+    notes = models.TextField(blank=True)
+    
+    def __str__(self):
+        return f"{self.test_parameter.name}: {self.value} {self.unit}"
+    
+    class Meta:
+        unique_together = ['test_measurement', 'test_parameter']
+
+
+class QuestionResponse(models.Model):
+    """
+    Model to store responses to test questions
+    """
+    test_measurement = models.ForeignKey(TestMeasurement, on_delete=models.CASCADE, related_name='question_responses')
+    test_question = models.ForeignKey(TestQuestion, on_delete=models.CASCADE)
+    response = models.BooleanField()  # True for 'Yes', False for 'No'
+    notes = models.TextField(blank=True)
+    
+    def __str__(self):
+        response_text = "Yes" if self.response else "No"
+        return f"{self.test_question}: {response_text}"
+    
+    class Meta:
+        unique_together = ['test_measurement', 'test_question']
     
 
 class FileAttachment(models.Model):

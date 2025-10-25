@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
-from .models import Batch, PCB, TestMeasurement, FileAttachment, Module, ModuleTestRecord, UserGroupExtension, PCBType
+from .models import Batch, PCB, TestMeasurement, FileAttachment, Module, ModuleTestRecord, UserGroupExtension, PCBType, TestConfig, TestParameter, TestQuestion, ParameterMeasurement, QuestionResponse
 
 
 @admin.register(Batch)
@@ -50,6 +50,51 @@ class PCBTypeAdmin(admin.ModelAdmin):
     list_display = ['name', 'created_at', 'description']
     list_filter = ['created_at']
     search_fields = ['name', 'description']
+
+
+@admin.register(TestConfig)
+class TestConfigAdmin(admin.ModelAdmin):
+    list_display = ['name', 'pcb_type', 'created_at', 'description']
+    list_filter = ['pcb_type', 'created_at']
+    search_fields = ['name', 'description', 'pcb_type__name']
+
+
+class TestParameterInline(admin.TabularInline):
+    model = TestParameter
+    extra = 3
+
+
+class TestQuestionInline(admin.TabularInline):
+    model = TestQuestion
+    extra = 2
+
+
+@admin.register(TestParameter)
+class TestParameterAdmin(admin.ModelAdmin):
+    list_display = ['name', 'parameter_type', 'test_config', 'min_value', 'max_value', 'unit', 'required']
+    list_filter = ['parameter_type', 'test_config', 'required', 'unit']
+    search_fields = ['name', 'test_config__name']
+
+
+@admin.register(TestQuestion)
+class TestQuestionAdmin(admin.ModelAdmin):
+    list_display = ['question_text', 'test_config', 'required']
+    list_filter = ['test_config', 'required']
+    search_fields = ['question_text', 'test_config__name']
+
+
+@admin.register(ParameterMeasurement)
+class ParameterMeasurementAdmin(admin.ModelAdmin):
+    list_display = ['test_parameter', 'value', 'test_measurement', 'unit']
+    list_filter = ['test_parameter__test_config', 'unit']
+    search_fields = ['test_parameter__name', 'test_measurement__pcb__serial_number']
+
+
+@admin.register(QuestionResponse)
+class QuestionResponseAdmin(admin.ModelAdmin):
+    list_display = ['test_question', 'response', 'test_measurement']
+    list_filter = ['test_question__test_config', 'response']
+    search_fields = ['test_question__question_text', 'test_measurement__pcb__serial_number']
 
 
 @admin.register(UserGroupExtension)

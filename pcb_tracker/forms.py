@@ -1,5 +1,6 @@
 from django import forms
-from .models import Batch, PCB, TestMeasurement, FileAttachment, Module, ModuleTestRecord, PCBType
+from .models import PCB, TestMeasurement, FileAttachment, Module, ModuleTestRecord, PCBType, TestConfig, TestParameter, TestQuestion, Batch
+from django.core.exceptions import ValidationError
 
 
 class PCBTestForm(forms.Form):
@@ -115,6 +116,22 @@ class ModuleTestForm(forms.ModelForm):
         self.fields['module'].queryset = Module.objects.filter(status='assembled')
 
 
+class PCBCreateForm(forms.ModelForm):
+    class Meta:
+        model = PCB
+        fields = ['serial_number', 'batch', 'test_config', 'notes']
+        widgets = {
+            'notes': forms.Textarea(attrs={'rows': 3}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Only show batches that exist
+        self.fields['batch'].queryset = Batch.objects.all()
+        # Only show test configs that exist
+        self.fields['test_config'].queryset = TestConfig.objects.all()
+
+
 class BatchCreateForm(forms.ModelForm):
     class Meta:
         model = Batch
@@ -138,15 +155,73 @@ class PCBTypeForm(forms.ModelForm):
         }
 
 
-class PCBCreateForm(forms.ModelForm):
-    class Meta:
-        model = PCB
-        fields = ['serial_number', 'batch', 'notes']
-        widgets = {
-            'notes': forms.Textarea(attrs={'rows': 3}),
-        }
-    
+class PCBTestWithConfigForm(forms.Form):
+    """
+    Form that adapts to the specific test configuration of a PCB
+    """
     def __init__(self, *args, **kwargs):
+        self.pcb = kwargs.pop('pcb', None)
         super().__init__(*args, **kwargs)
-        # Only show batches that exist
-        self.fields['batch'].queryset = Batch.objects.all()
+        
+        # If we have a PCB with a test config, dynamically add form fields
+        if self.pcb and self.pcb.test_config:
+            test_config = self.pcb.test_config
+            
+            # Add fields for each test parameter
+            for parameter in test_config.parameters.all():
+                field_name = f"param_{parameter.id}"
+                if parameter.parameter_type == 'voltage':
+                    self.fields[field_name] = forms.DecimalField(
+                        label=parameter.name,
+                        required=parameter.required,
+                        decimal_places=4,
+                        max_digits=15
+                    )
+                elif parameter.parameter_type == 'current':
+                    self.fields[field_name] = forms.DecimalField(
+                        label=parameter.name,
+                        required=parameter.required,
+                        decimal_places=4,
+                        max_digits=15
+                    )
+                elif parameter.parameter_type == 'frequency':
+                    self.fields[field_name] = forms.DecimalField(
+                        label=parameter.name,
+                        required=parameter.required,
+                        decimal_places=2,
+                        max_digits=15
+                    )
+                elif parameter.parameter_type == 'resistance':
+                    self.fields[field_name] = forms.DecimalField(
+                        label=parameter.name,
+                        required=parameter.required,
+                        decimal_places=2,
+                        max_digits=15
+                    )
+                else:  # 'temperature' or 'other'
+                    self.fields[field_name] = forms.DecimalField(
+                        label=parameter.name,
+                        required=parameter.required,
+                        decimal_places=2,
+                        max_digits=15
+                    )
+            
+            # Add fields for each test question
+            for question in test_config.questions.all():
+                field_name = f"question_{question.id}"
+                self.fields[field_name] = forms.BooleanField(
+                    label=question.question_text,
+                    required=question.required,
+                    widget=forms.RadioSelect(choices=[(True, 'Yes'), (False, 'No')])
+                )
+        
+        # Add general fields
+        self.fields['notes'] = forms.CharField(
+            widget=forms.Textarea(attrs={'rows': 3}),
+            required=False,
+            label="Additional Notes"
+        )
+        
+        # File attachment
+        self.fields['file'] = forms.FileField(required=False)
+        self.fields['file_description'] = forms.CharField(required=False)

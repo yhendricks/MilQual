@@ -10,108 +10,6 @@
     </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-md-12">
-        <h3>Enter Test Data</h3>
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            
-            <div class="row mb-3">
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label for="{{ form.pcb_serial.id_for_label }}" class="form-label">PCB Serial Number</label>
-                        {{ form.pcb_serial }}
-                        {% if form.pcb_serial.errors %}
-                            <div class="text-danger">{{ form.pcb_serial.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <div class="col-md-2">
-                    <div class="mb-3">
-                        <label for="{{ form.voltage.id_for_label }}" class="form-label">Voltage (V)</label>
-                        {{ form.voltage }}
-                        {% if form.voltage.errors %}
-                            <div class="text-danger">{{ form.voltage.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <div class="col-md-2">
-                    <div class="mb-3">
-                        <label for="{{ form.current.id_for_label }}" class="form-label">Current (A)</label>
-                        {{ form.current }}
-                        {% if form.current.errors %}
-                            <div class="text-danger">{{ form.current.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <div class="col-md-2">
-                    <div class="mb-3">
-                        <label for="{{ form.temperature.id_for_label }}" class="form-label">Temperature (°C)</label>
-                        {{ form.temperature }}
-                        {% if form.temperature.errors %}
-                            <div class="text-danger">{{ form.temperature.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">Submit Test Data</button>
-                </div>
-            </div>
-            
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="{{ form.other_measurements.id_for_label }}" class="form-label">Other Measurements (JSON)</label>
-                        {{ form.other_measurements }}
-                        <div class="form-text">Enter additional measurements in JSON format, e.g., {"frequency": 1.2, "power": 5.0}</div>
-                        {% if form.other_measurements.errors %}
-                            <div class="text-danger">{{ form.other_measurements.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
-                        {{ form.notes }}
-                        {% if form.notes.errors %}
-                            <div class="text-danger">{{ form.notes.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            
-            <h4>Attach File (.xlsx)</h4>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="{{ attachment_form.file.id_for_label }}" class="form-label">Excel File</label>
-                        {{ attachment_form.file }}
-                        {% if attachment_form.file.errors %}
-                            <div class="text-danger">{{ attachment_form.file.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="{{ attachment_form.description.id_for_label }}" class="form-label">File Description</label>
-                        {{ attachment_form.description }}
-                        {% if attachment_form.description.errors %}
-                            <div class="text-danger">{{ attachment_form.description.errors }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            <!-- Submit button already exists in the top row, so no need for another one here -->
-        </form>
-    </div>
-</div>
-
 <!-- Search and Filter Section -->
 <div class="row mt-4">
     <div class="col-md-12">
@@ -139,6 +37,7 @@
                             <th>Serial Number</th>
                             <th>Batch</th>
                             <th>PCB Type</th>
+                            <th>Test Config</th>
                             <th>Date Added</th>
                             <th>Actions</th>
                         </tr>
@@ -149,11 +48,12 @@
                             <td>{{ pcb.serial_number }}</td>
                             <td>{{ pcb.batch.batch_number }}</td>
                             <td>{{ pcb.batch.pcb_type.name }}</td>
+                            <td>{{ pcb.test_config.name|default:"No config" }}</td>
                             <td>{{ pcb.created_at|date:"M d, Y H:i" }}</td>
                             <td>
                                 <button type="button" class="btn btn-sm btn-outline-primary" 
-                                        onclick="document.getElementById('{{ form.pcb_serial.id_for_label }}').value='{{ pcb.serial_number }}'">
-                                    Select
+                                        onclick="loadTestForm('{{ pcb.serial_number }}', {{ pcb.test_config.id|default:"null" }})">
+                                    Test
                                 </button>
                             </td>
                         </tr>
@@ -210,4 +110,83 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Test Form Section -->
+<div class="row mt-4" id="testFormSection" style="display:none;">
+    <div class="col-md-12">
+        <h3 id="testFormTitle">Test PCB</h3>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <input type="hidden" name="pcb_serial" id="pcbSerialInput">
+            
+            <div id="dynamicFormContent">
+                <!-- Dynamic form content will be loaded here based on test config -->
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Additional Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <h4>Attach File (.xlsx)</h4>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Excel File</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls">
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="file_description" class="form-label">File Description</label>
+                        <input type="text" class="form-control" id="file_description" name="file_description">
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Submit Test Data</button>
+            <button type="button" class="btn btn-secondary" onclick="hideTestForm()">Cancel</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function loadTestForm(serialNumber, testConfigId) {
+    // Show the form section
+    document.getElementById('testFormSection').style.display = 'block';
+    document.getElementById('pcbSerialInput').value = serialNumber;
+    document.getElementById('testFormTitle').textContent = `Test PCB ${serialNumber}`;
+    
+    // Scroll to the form
+    document.getElementById('testFormSection').scrollIntoView({ behavior: 'smooth' });
+    
+    // If there's a test config, load the relevant fields
+    if (testConfigId) {
+        // In a real application, we would load the test config via AJAX
+        // For now, we'll just show a message
+        document.getElementById('dynamicFormContent').innerHTML = `
+            <div class="alert alert-info mt-3">
+                Test configuration will be loaded here dynamically when a PCB with a test config is selected.
+            </div>
+        `;
+    } else {
+        document.getElementById('dynamicFormContent').innerHTML = `
+            <div class="alert alert-warning mt-3">
+                This PCB does not have a test configuration associated with it.
+            </div>
+        `;
+    }
+}
+
+function hideTestForm() {
+    document.getElementById('testFormSection').style.display = 'none';
+}
+</script>
+
 {% endblock %}

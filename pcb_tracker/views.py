@@ -483,13 +483,33 @@ def test_config_edit(request, test_config_id):
     test_config = get_object_or_404(TestConfig, id=test_config_id)
     
     if request.method == 'POST':
-        form = TestConfigForm(request.POST, instance=test_config)
-        if form.is_valid():
-            test_config = form.save()
-            messages.success(request, f'Test configuration "{test_config.name}" updated successfully!')
-            return redirect('test_config_manage')
+        # Handle different actions
+        if 'update_config' in request.POST:
+            form = TestConfigForm(request.POST, instance=test_config)
+            if form.is_valid():
+                test_config = form.save()
+                messages.success(request, f'Test configuration "{test_config.name}" updated successfully!')
+                return redirect('test_config_edit', test_config_id=test_config.id)
+        elif 'add_parameter' in request.POST:
+            parameter_form = TestParameterForm(request.POST)
+            if parameter_form.is_valid():
+                parameter = parameter_form.save(commit=False)
+                parameter.test_config = test_config
+                parameter.save()
+                messages.success(request, f'Parameter "{parameter.name}" added successfully!')
+                return redirect('test_config_edit', test_config_id=test_config.id)
+        elif 'add_question' in request.POST:
+            question_form = TestQuestionForm(request.POST)
+            if question_form.is_valid():
+                question = question_form.save(commit=False)
+                question.test_config = test_config
+                question.save()
+                messages.success(request, f'Question added successfully!')
+                return redirect('test_config_edit', test_config_id=test_config.id)
     else:
         form = TestConfigForm(instance=test_config)
+        parameter_form = TestParameterForm()
+        question_form = TestQuestionForm()
     
     # Get related parameters and questions
     parameters = test_config.parameters.all().order_by('order')
@@ -497,6 +517,8 @@ def test_config_edit(request, test_config_id):
     
     context = {
         'form': form,
+        'parameter_form': parameter_form,
+        'question_form': question_form,
         'test_config': test_config,
         'parameters': parameters,
         'questions': questions,

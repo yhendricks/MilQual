@@ -340,6 +340,9 @@ def batch_manage(request):
     else:
         form = BatchCreateForm()
     
+    # Force refresh the form's queryset for the PCBType field
+    form.fields['pcb_type'].queryset = PCBType.objects.all()
+    
     # Get all existing batches and paginate them
     batches = Batch.objects.all().order_by('-production_date')
     paginator = Paginator(batches, 10)  # Show 10 batches per page

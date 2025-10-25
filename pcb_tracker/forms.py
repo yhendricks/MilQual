@@ -1,5 +1,5 @@
 from django import forms
-from .models import PCB, TestMeasurement, FileAttachment, Module, ModuleTestRecord
+from .models import Batch, PCB, TestMeasurement, FileAttachment, Module, ModuleTestRecord
 
 
 class PCBTestForm(forms.Form):
@@ -113,3 +113,17 @@ class ModuleTestForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Only show modules that are in the correct state for this test
         self.fields['module'].queryset = Module.objects.filter(status='assembled')
+
+
+class PCBCreateForm(forms.ModelForm):
+    class Meta:
+        model = PCB
+        fields = ['serial_number', 'batch', 'notes']
+        widgets = {
+            'notes': forms.Textarea(attrs={'rows': 3}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Only show batches that exist
+        self.fields['batch'].queryset = Batch.objects.all()

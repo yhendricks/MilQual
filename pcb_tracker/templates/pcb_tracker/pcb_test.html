@@ -118,6 +118,11 @@
             </div>
         {% else %}
             <p class="text-muted">No PCBs are currently pending testing.</p>
+            {% for group in user.groups.all %}
+                {% if 'Manager' in group.name %}
+                    <p><a href="{% url 'pcb_create' %}" class="btn btn-primary">Create New PCB</a></p>
+                {% endif %}
+            {% endfor %}
         {% endif %}
     </div>
 </div>

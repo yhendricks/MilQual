@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Create PCB - MilQual{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Create New PCB</h1>
+        <p class="lead">Add a new PCB to a batch</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <h3>Enter PCB Details</h3>
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="{{ form.serial_number.id_for_label }}" class="form-label">PCB Serial Number</label>
+                {{ form.serial_number }}
+                {% if form.serial_number.errors %}
+                    <div class="text-danger">{{ form.serial_number.errors }}</div>
+                {% endif %}
+                <div class="form-text">Enter the unique serial number for this PCB</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.batch.id_for_label }}" class="form-label">Batch</label>
+                {{ form.batch }}
+                {% if form.batch.errors %}
+                    <div class="text-danger">{{ form.batch.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                    <div class="text-danger">{{ form.notes.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Create PCB</button>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+    
+    <div class="col-md-6">
+        <h3>Existing Batches</h3>
+        {% if batches %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Batch Number</th>
+                            <th>Production Date</th>
+                            <th>PCBs Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for batch in batches %}
+                        <tr>
+                            <td>{{ batch.batch_number }}</td>
+                            <td>{{ batch.production_date|date:"M d, Y" }}</td>
+                            <td>{{ batch.pcbs.count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">No batches exist yet. You may need to create a batch first.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h3>Create New Batch</h3>
+        <p>If no suitable batch exists, a manager can create a new batch in the admin panel.</p>
+        <a href="/admin/pcb_tracker/batch/add/" class="btn btn-outline-primary" target="_blank">Create New Batch in Admin</a>
+    </div>
+</div>
+{% endblock %}

@@ -44,17 +44,31 @@ def is_manager(user):
     return user_in_group(user, ['Manager_lvl1', 'Manager_lvl2'])
 
 
+def can_view_production_summary(user):
+    """Check if user can view production summary (managers and QA)"""
+    return user_in_group(user, ['QA_lvl1', 'QA_lvl2', 'Manager_lvl1', 'Manager_lvl2'])
+
+
 @login_required
 def dashboard(request):
     """Main dashboard showing the status of PCBs and modules"""
-    pcb_count = PCB.objects.count()
-    pcb_pending = PCB.objects.filter(status='pending').count()
-    pcb_tested = PCB.objects.filter(status='tested').count()
-    pcb_qa_verified = PCB.objects.filter(status='qa_verified').count()
+    # Check if user can view production summary
+    can_view_summary = can_view_production_summary(request.user)
     
-    module_count = Module.objects.count()
-    modules_assembled = Module.objects.filter(status='assembled').count()
-    modules_functional_tested = Module.objects.filter(status='functional_tested').count()
+    # Only fetch counts if user can view summary
+    if can_view_summary:
+        pcb_count = PCB.objects.count()
+        pcb_pending = PCB.objects.filter(status='pending').count()
+        pcb_tested = PCB.objects.filter(status='tested').count()
+        pcb_qa_verified = PCB.objects.filter(status='qa_verified').count()
+        
+        module_count = Module.objects.count()
+        modules_assembled = Module.objects.filter(status='assembled').count()
+        modules_functional_tested = Module.objects.filter(status='functional_tested').count()
+    else:
+        # Set default values if user can't view summary
+        pcb_count = pcb_pending = pcb_tested = pcb_qa_verified = 0
+        module_count = modules_assembled = modules_functional_tested = 0
     
     # Get batches for managers
     batches = Batch.objects.all() if is_manager(request.user) else Batch.objects.none()
@@ -68,6 +82,7 @@ def dashboard(request):
         'modules_assembled': modules_assembled,
         'modules_functional_tested': modules_functional_tested,
         'batches': batches,
+        'can_view_summary': can_view_summary,
     }
     return render(request, 'pcb_tracker/dashboard.html', context)
 

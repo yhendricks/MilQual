@@ -7,3 +7,4 @@ class PcbTrackerConfig(AppConfig):
     
     def ready(self):
         import pcb_tracker.signals  # Import signals if we have any
+        from . import signals  # Import the signals module

@@ -31,11 +31,25 @@
                     {% for group in user.groups.all %}
                         {% if 'Manager' in group.name %}
                             <a class="nav-link" href="{% url 'module_sign_off' %}">Sign Off</a>
-                            <a class="nav-link" href="{% url 'pcb_type_create' %}">Create PCB Type</a>
-                            <a class="nav-link" href="{% url 'batch_create' %}">Create Batch</a>
-                            <a class="nav-link" href="{% url 'pcb_create' %}">Create PCB</a>
                         {% endif %}
                     {% endfor %}
+                    {% if user.groups.all %}
+                        {% for group in user.groups.all %}
+                            {% if 'Manager' in group.name %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="createDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Create
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="createDropdown">
+                                    <li><a class="dropdown-item" href="{% url 'pcb_type_create' %}">Create PCB Type</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'batch_create' %}">Create Batch</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'pcb_create' %}">Create PCB</a></li>
+                                </ul>
+                            </li>
+                            {% break %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
                 {% endif %}
                 {% if user.is_staff %}
                     <a class="nav-link" href="/admin/">Admin</a>

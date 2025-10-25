@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group
-from .models import Batch, PCB, TestMeasurement, FileAttachment, Module, ModuleTestRecord, UserGroupExtension
+from .models import Batch, PCB, TestMeasurement, FileAttachment, Module, ModuleTestRecord, UserGroupExtension, PCBType
 
 
 @admin.register(Batch)
@@ -43,6 +43,13 @@ class ModuleTestRecordAdmin(admin.ModelAdmin):
     list_display = ['module', 'test_type', 'result', 'tester', 'test_date']
     list_filter = ['test_type', 'result', 'test_date', 'tester']
     search_fields = ['module__module_serial_number']
+
+
+@admin.register(PCBType)
+class PCBTypeAdmin(admin.ModelAdmin):
+    list_display = ['name', 'created_at', 'description']
+    list_filter = ['created_at']
+    search_fields = ['name', 'description']
 
 
 @admin.register(UserGroupExtension)

@@ -45,8 +45,8 @@ def is_manager(user):
 
 
 def can_view_production_summary(user):
-    """Check if user can view production summary (managers and QA)"""
-    return user_in_group(user, ['QA_lvl1', 'QA_lvl2', 'Manager_lvl1', 'Manager_lvl2'])
+    """Check if user can view production summary (specific group)"""
+    return user_in_group(user, ['production_summary'])
 
 
 @login_required

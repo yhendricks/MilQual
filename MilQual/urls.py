@@ -7,5 +7,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('register/', pcb_tracker_views.register, name='register'),
+    path('profile/', pcb_tracker_views.profile, name='profile'),
     path('', include('pcb_tracker.urls')),
 ]

@@ -424,3 +424,39 @@ def register(request):
         return redirect('dashboard')
     
     return render(request, 'registration/register.html')
+
+
+@login_required
+def profile(request):
+    """User profile page"""
+    if request.method == 'POST':
+        # Update user profile information
+        user = request.user
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        
+        # Check if username is taken by another user
+        if username and username != user.username:
+            if User.objects.filter(username=username).exclude(id=user.id).exists():
+                messages.error(request, 'Username already exists.')
+                return render(request, 'pcb_tracker/profile.html', {'user': user})
+        
+        # Check if email is taken by another user
+        if email and email != user.email:
+            if User.objects.filter(email=email).exclude(id=user.id).exists():
+                messages.error(request, 'Email already exists.')
+                return render(request, 'pcb_tracker/profile.html', {'user': user})
+        
+        # Update user fields
+        if username: user.username = username
+        if email: user.email = email
+        if first_name: user.first_name = first_name
+        if last_name: user.last_name = last_name
+        
+        user.save()
+        messages.success(request, 'Profile updated successfully!')
+        return redirect('profile')
+    
+    return render(request, 'pcb_tracker/profile.html', {'user': request.user})

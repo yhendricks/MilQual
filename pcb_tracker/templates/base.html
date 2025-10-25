@@ -24,12 +24,12 @@
                         {% endif %}
                     {% endfor %}
                     
-                    <!-- Manage Dropdown for all authenticated users -->
+                    <!-- Manage Workflow Dropdown for all authenticated users -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="manageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Manage
+                        <a class="nav-link dropdown-toggle" href="#" id="manageWorkflowDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Manage Workflow
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="manageDropdown">
+                        <ul class="dropdown-menu" aria-labelledby="manageWorkflowDropdown">
                             <!-- Show all options to admin users -->
                             {% if user.is_staff %}
                                 <li><a class="dropdown-item" href="{% url 'pcb_type_create' %}">Create PCB Type</a></li>

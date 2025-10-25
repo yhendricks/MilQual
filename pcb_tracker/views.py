@@ -267,15 +267,31 @@ def pcb_detail(request, pcb_id):
 
 
 @login_required
-@user_passes_test(is_manager)  # Only managers can create PCB types
-def pcb_type_create(request):
-    """View for managers to create new PCB types"""
+@user_passes_test(lambda u: user_in_group(u, ['manage_pcb_type', 'Manager_lvl1', 'Manager_lvl2', 'Admin']))
+def pcb_type_manage(request):
+    """View for managing PCB types with CRUD operations"""
     if request.method == 'POST':
-        form = PCBTypeForm(request.POST)
-        if form.is_valid():
-            pcb_type = form.save()
-            messages.success(request, f'PCB Type {pcb_type.name} created successfully!')
-            return redirect('pcb_type_create')
+        if 'create' in request.POST:
+            form = PCBTypeForm(request.POST)
+            if form.is_valid():
+                pcb_type = form.save()
+                messages.success(request, f'PCB Type {pcb_type.name} created successfully!')
+                return redirect('pcb_type_manage')
+        elif 'update' in request.POST:
+            pcb_type_id = request.POST.get('pcb_type_id')
+            pcb_type = get_object_or_404(PCBType, id=pcb_type_id)
+            form = PCBTypeForm(request.POST, instance=pcb_type)
+            if form.is_valid():
+                form.save()
+                messages.success(request, f'PCB Type {pcb_type.name} updated successfully!')
+                return redirect('pcb_type_manage')
+        elif 'delete' in request.POST:
+            pcb_type_id = request.POST.get('pcb_type_id')
+            pcb_type = get_object_or_404(PCBType, id=pcb_type_id)
+            pcb_type_name = pcb_type.name
+            pcb_type.delete()
+            messages.success(request, f'PCB Type {pcb_type_name} deleted successfully!')
+            return redirect('pcb_type_manage')
     else:
         form = PCBTypeForm()
     
@@ -286,7 +302,7 @@ def pcb_type_create(request):
         'form': form,
         'pcb_types': pcb_types,
     }
-    return render(request, 'pcb_tracker/pcb_type_create.html', context)
+    return render(request, 'pcb_tracker/pcb_type_manage.html', context)
 
 
 @login_required

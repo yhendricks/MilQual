@@ -155,6 +155,38 @@ class PCBTypeForm(forms.ModelForm):
         }
 
 
+class TestConfigForm(forms.ModelForm):
+    class Meta:
+        model = TestConfig
+        fields = ['name', 'description', 'pcb_type']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Only show PCB types that exist
+        self.fields['pcb_type'].queryset = PCBType.objects.all()
+
+
+class TestParameterForm(forms.ModelForm):
+    class Meta:
+        model = TestParameter
+        fields = ['name', 'parameter_type', 'description', 'min_value', 'max_value', 'unit', 'required', 'order']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 2}),
+        }
+
+
+class TestQuestionForm(forms.ModelForm):
+    class Meta:
+        model = TestQuestion
+        fields = ['question_text', 'required', 'order']
+        widgets = {
+            'question_text': forms.Textarea(attrs={'rows': 2}),
+        }
+
+
 class PCBTestWithConfigForm(forms.Form):
     """
     Form that adapts to the specific test configuration of a PCB

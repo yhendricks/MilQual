@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Test Configuration - MilQual{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Create Test Configuration</h1>
+        <p class="lead">Define a new test configuration for PCB testing</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="{{ form.name.id_for_label }}" class="form-label">Configuration Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="text-danger">{{ form.name.errors }}</div>
+                {% endif %}
+                <div class="form-text">Enter a unique name for this test configuration</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.pcb_type.id_for_label }}" class="form-label">PCB Type</label>
+                {{ form.pcb_type }}
+                {% if form.pcb_type.errors %}
+                    <div class="text-danger">{{ form.pcb_type.errors }}</div>
+                {% endif %}
+                <div class="form-text">Select the PCB type this configuration applies to</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="text-danger">{{ form.description.errors }}</div>
+                {% endif %}
+                <div class="form-text">Provide a detailed description of when and how this configuration should be used</div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Create Test Configuration</button>
+            <a href="{% url 'test_config_manage' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h3>Next Steps</h3>
+        <p>After creating a test configuration, you can add parameters and questions to define what should be tested:</p>
+        <ol>
+            <li>Add test parameters (voltage, current, frequency, resistance, temperature, etc.)</li>
+            <li>Add test questions (yes/no questions for qualitative assessment)</li>
+        </ol>
+        <p>You can manage these after the configuration is created.</p>
+    </div>
+</div>
+{% endblock %}

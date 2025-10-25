@@ -19,6 +19,7 @@ def create_user_groups(apps, schema_editor):
         {'name': 'Environmental_tester_lvl1', 'level': 1, 'department': 'Testing', 'description': 'Level 1 Environmental Tester - Performs environmental testing on modules'},
         {'name': 'Manager_lvl1', 'level': 1, 'department': 'Management', 'description': 'Level 1 Manager - Oversees operations and provides final sign-off'},
         {'name': 'Manager_lvl2', 'level': 2, 'department': 'Management', 'description': 'Level 2 Manager - Senior management with additional oversight capabilities'},
+        {'name': 'test_config_manager', 'level': 2, 'department': 'Engineering', 'description': 'Test Configuration Manager - Manages test configurations and parameters'},
         {'name': 'Admin', 'level': 99, 'department': 'Administration', 'description': 'System Administrator with full access'},
     ]
     
@@ -41,6 +42,17 @@ def create_user_groups(apps, schema_editor):
     module_content_type = ContentType.objects.get_for_model(apps.get_model('pcb_tracker', 'Module'))
     module_test_record_content_type = ContentType.objects.get_for_model(apps.get_model('pcb_tracker', 'ModuleTestRecord'))
     file_attachment_content_type = ContentType.objects.get_for_model(apps.get_model('pcb_tracker', 'FileAttachment'))
+    
+    # Test config content types (if they exist in this migration)
+    try:
+        test_config_content_type = ContentType.objects.get_for_model(apps.get_model('pcb_tracker', 'TestConfig'))
+        test_parameter_content_type = ContentType.objects.get_for_model(apps.get_model('pcb_tracker', 'TestParameter'))
+        test_question_content_type = ContentType.objects.get_for_model(apps.get_model('pcb_tracker', 'TestQuestion'))
+    except:
+        # If models don't exist yet in this migration, we'll add permissions later
+        test_config_content_type = None
+        test_parameter_content_type = None
+        test_question_content_type = None
     
     permissions_config = {
         'board_tester_lvl1': [
@@ -243,6 +255,26 @@ def create_user_groups(apps, schema_editor):
             {'codename': 'view_fileattachment', 'content_type': file_attachment_content_type},
             {'codename': 'change_fileattachment', 'content_type': file_attachment_content_type},
             {'codename': 'delete_fileattachment', 'content_type': file_attachment_content_type},
+        ],
+        
+        'test_config_manager': [
+            # Full CRUD permissions for test configurations
+            {'codename': 'add_testconfig', 'content_type': test_config_content_type},
+            {'codename': 'view_testconfig', 'content_type': test_config_content_type},
+            {'codename': 'change_testconfig', 'content_type': test_config_content_type},
+            {'codename': 'delete_testconfig', 'content_type': test_config_content_type},
+            {'codename': 'add_testparameter', 'content_type': test_parameter_content_type},
+            {'codename': 'view_testparameter', 'content_type': test_parameter_content_type},
+            {'codename': 'change_testparameter', 'content_type': test_parameter_content_type},
+            {'codename': 'delete_testparameter', 'content_type': test_parameter_content_type},
+            {'codename': 'add_testquestion', 'content_type': test_question_content_type},
+            {'codename': 'view_testquestion', 'content_type': test_question_content_type},
+            {'codename': 'change_testquestion', 'content_type': test_question_content_type},
+            {'codename': 'delete_testquestion', 'content_type': test_question_content_type},
+            
+            # Can also view related models
+            {'codename': 'view_pcbtype', 'content_type': pcb_type_content_type},
+            {'codename': 'view_pcb', 'content_type': pcb_content_type},
         ],
     }
     

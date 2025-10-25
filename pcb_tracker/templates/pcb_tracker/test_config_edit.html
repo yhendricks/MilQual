@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Test Configuration - {{ test_config.name }} - MilQual{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Edit Test Configuration: {{ test_config.name }}</h1>
+        <p class="lead">Modify the test configuration for {{ test_config.pcb_type.name }} PCBs</p>
+    </div>
+</div>
+
+<!-- Main Configuration Form -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h3>Configuration Details</h3>
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="{{ form.name.id_for_label }}" class="form-label">Configuration Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="text-danger">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.pcb_type.id_for_label }}" class="form-label">PCB Type</label>
+                {{ form.pcb_type }}
+                {% if form.pcb_type.errors %}
+                    <div class="text-danger">{{ form.pcb_type.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="text-danger">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Update Configuration</button>
+            <a href="{% url 'test_config_manage' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+
+<!-- Parameters Section -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>Test Parameters</h3>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addParameterModal">
+                Add Parameter
+            </button>
+        </div>
+        
+        {% if parameters %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Range</th>
+                            <th>Unit</th>
+                            <th>Required</th>
+                            <th>Order</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for parameter in parameters %}
+                        <tr>
+                            <td>{{ parameter.name }}</td>
+                            <td>{{ parameter.get_parameter_type_display }}</td>
+                            <td>{{ parameter.description|truncatewords:5 }}</td>
+                            <td>
+                                {% if parameter.min_value or parameter.max_value %}
+                                    {{ parameter.min_value|default:"-" }} to {{ parameter.max_value|default:"-" }}
+                                {% else %}
+                                    No limits
+                                {% endif %}
+                            </td>
+                            <td>{{ parameter.unit }}</td>
+                            <td>
+                                {% if parameter.required %}
+                                    <span class="badge bg-success">Required</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Optional</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ parameter.order }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-primary">Edit</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">No parameters defined for this configuration yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Questions Section -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>Test Questions</h3>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
+                Add Question
+            </button>
+        </div>
+        
+        {% if questions %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Question</th>
+                            <th>Required</th>
+                            <th>Order</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for question in questions %}
+                        <tr>
+                            <td>{{ question.question_text }}</td>
+                            <td>
+                                {% if question.required %}
+                                    <span class="badge bg-success">Required</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Optional</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ question.order }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-primary">Edit</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">No questions defined for this configuration yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Parameter Modal -->
+<div class="modal fade" id="addParameterModal" tabindex="-1" aria-labelledby="addParameterModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addParameterModalLabel">Add Test Parameter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="parameterName" class="form-label">Parameter Name</label>
+                        <input type="text" class="form-control" id="parameterName" placeholder="e.g., Supply Voltage">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="parameterType" class="form-label">Parameter Type</label>
+                        <select class="form-select" id="parameterType">
+                            <option value="voltage">Voltage</option>
+                            <option value="current">Current</option>
+                            <option value="frequency">Frequency</option>
+                            <option value="resistance">Resistance</option>
+                            <option value="temperature">Temperature</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="parameterDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="parameterDescription" rows="2" placeholder="Brief description of what this parameter measures"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="minValue" class="form-label">Minimum Value</label>
+                                <input type="number" class="form-control" id="minValue" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="maxValue" class="form-label">Maximum Value</label>
+                                <input type="number" class="form-control" id="maxValue" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="parameterUnit" class="form-label">Unit</label>
+                        <input type="text" class="form-control" id="parameterUnit" placeholder="e.g., V, A, Hz, Ohm, °C">
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="parameterRequired" checked>
+                        <label class="form-check-label" for="parameterRequired">
+                            Required Parameter
+                        </label>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="parameterOrder" class="form-label">Display Order</label>
+                        <input type="number" class="form-control" id="parameterOrder" value="0" min="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Add Parameter</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Question Modal -->
+<div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addQuestionModalLabel">Add Test Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="questionText" class="form-label">Question Text</label>
+                        <textarea class="form-control" id="questionText" rows="3" placeholder="Enter a yes/no question for testing"></textarea>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="questionRequired" checked>
+                        <label class="form-check-label" for="questionRequired">
+                            Required Question
+                        </label>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="questionOrder" class="form-label">Display Order</label>
+                        <input type="number" class="form-control" id="questionOrder" value="0" min="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Add Question</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

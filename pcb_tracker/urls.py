@@ -12,4 +12,10 @@ urlpatterns = [
     path('module/functional-test/', views.module_functional_test, name='module_functional_test'),
     path('module/sign-off/', views.module_sign_off, name='module_sign_off'),
     path('pcb/<int:pcb_id>/', views.pcb_detail, name='pcb_detail'),
+    
+    # Test configuration management URLs
+    path('test-config/manage/', views.test_config_manage, name='test_config_manage'),
+    path('test-config/create/', views.test_config_create, name='test_config_create'),
+    path('test-config/<int:test_config_id>/edit/', views.test_config_edit, name='test_config_edit'),
+    path('test-config/<int:test_config_id>/delete/', views.test_config_delete, name='test_config_delete'),
 ]

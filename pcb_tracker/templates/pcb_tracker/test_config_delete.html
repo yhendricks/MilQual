@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Test Configuration - {{ test_config.name }} - MilQual{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Delete Test Configuration</h1>
+        <p class="lead">Confirm deletion of test configuration: {{ test_config.name }}</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5>Warning: Irreversible Action</h5>
+            </div>
+            <div class="card-body">
+                <p>You are about to delete the test configuration <strong>{{ test_config.name }}</strong>.</p>
+                
+                <p><strong>This action cannot be undone.</strong></p>
+                
+                <h5>Configuration Details:</h5>
+                <ul>
+                    <li><strong>Name:</strong> {{ test_config.name }}</li>
+                    <li><strong>PCB Type:</strong> {{ test_config.pcb_type.name }}</li>
+                    <li><strong>Description:</strong> {{ test_config.description|default:"No description provided" }}</li>
+                    <li><strong>Created:</strong> {{ test_config.created_at|date:"M d, Y H:i" }}</li>
+                    <li><strong>Last Updated:</strong> {{ test_config.updated_at|date:"M d, Y H:i" }}</li>
+                </ul>
+                
+                <h5>Impact Assessment:</h5>
+                <ul>
+                    <li><strong>Parameters:</strong> {{ test_config.parameters.count }} test parameters will be deleted</li>
+                    <li><strong>Questions:</strong> {{ test_config.questions.count }} test questions will be deleted</li>
+                    <li><strong>PCBs using this configuration:</strong> Any PCBs currently using this configuration will lose their test configuration reference</li>
+                    <li><strong>Test records:</strong> Existing test records associated with this configuration will remain but will no longer reference this configuration</li>
+                </ul>
+                
+                <div class="alert alert-warning">
+                    <strong>Note:</strong> Deleting a test configuration does not delete any PCBs or test records. However, PCBs that were using this configuration will no longer have access to its parameters and questions during testing.
+                </div>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">Yes, Delete Configuration</button>
+                        <a href="{% url 'test_config_manage' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h3>Alternatives to Consider</h3>
+        <p>Instead of deleting this configuration, you might consider:</p>
+        <ul>
+            <li><strong>Editing:</strong> Modify the configuration to meet new requirements</li>
+            <li><strong>Archiving:</strong> Mark the configuration as inactive but keep it for historical reference</li>
+            <li><strong>Duplicating:</strong> Create a new configuration based on this one with modifications</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

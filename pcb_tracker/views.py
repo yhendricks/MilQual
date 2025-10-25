@@ -7,7 +7,7 @@ from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden
 from django.core.exceptions import PermissionDenied
 from .models import PCB, Batch, TestMeasurement, FileAttachment, Module, ModuleTestRecord, PCBType, TestConfig, TestParameter, TestQuestion, ParameterMeasurement, QuestionResponse
-from .forms import PCBTestForm, FileAttachmentForm, ModuleAssemblyForm, ModuleTestForm, PCBCreateForm, BatchCreateForm, PCBTypeForm
+from .forms import PCBTestForm, FileAttachmentForm, ModuleAssemblyForm, ModuleTestForm, PCBCreateForm, BatchCreateForm, PCBTypeForm, TestConfigForm, TestParameterForm, TestQuestionForm
 
 
 def user_in_group(user, group_names):
@@ -434,6 +434,92 @@ def pcb_create(request):
         'batches': batches,
     }
     return render(request, 'pcb_tracker/pcb_create.html', context)
+
+
+def user_in_test_config_group(user):
+    """Check if user is in test_config_manager group or has equivalent permissions"""
+    return user.groups.filter(name='test_config_manager').exists() or user.is_staff
+
+
+@login_required
+@user_passes_test(user_in_test_config_group)
+def test_config_manage(request):
+    """View for managing test configurations with CRUD operations"""
+    # Get all test configs and paginate them
+    test_configs = TestConfig.objects.all().order_by('-created_at')
+    paginator = Paginator(test_configs, 10)  # Show 10 configs per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'test_configs': page_obj,
+    }
+    return render(request, 'pcb_tracker/test_config_manage.html', context)
+
+
+@login_required
+@user_passes_test(user_in_test_config_group)
+def test_config_create(request):
+    """View for creating new test configurations"""
+    if request.method == 'POST':
+        form = TestConfigForm(request.POST)
+        if form.is_valid():
+            test_config = form.save()
+            messages.success(request, f'Test configuration "{test_config.name}" created successfully!')
+            return redirect('test_config_manage')
+    else:
+        form = TestConfigForm()
+    
+    context = {
+        'form': form,
+    }
+    return render(request, 'pcb_tracker/test_config_create.html', context)
+
+
+@login_required
+@user_passes_test(user_in_test_config_group)
+def test_config_edit(request, test_config_id):
+    """View for editing existing test configurations"""
+    test_config = get_object_or_404(TestConfig, id=test_config_id)
+    
+    if request.method == 'POST':
+        form = TestConfigForm(request.POST, instance=test_config)
+        if form.is_valid():
+            test_config = form.save()
+            messages.success(request, f'Test configuration "{test_config.name}" updated successfully!')
+            return redirect('test_config_manage')
+    else:
+        form = TestConfigForm(instance=test_config)
+    
+    # Get related parameters and questions
+    parameters = test_config.parameters.all().order_by('order')
+    questions = test_config.questions.all().order_by('order')
+    
+    context = {
+        'form': form,
+        'test_config': test_config,
+        'parameters': parameters,
+        'questions': questions,
+    }
+    return render(request, 'pcb_tracker/test_config_edit.html', context)
+
+
+@login_required
+@user_passes_test(user_in_test_config_group)
+def test_config_delete(request, test_config_id):
+    """View for deleting test configurations"""
+    test_config = get_object_or_404(TestConfig, id=test_config_id)
+    
+    if request.method == 'POST':
+        config_name = test_config.name
+        test_config.delete()
+        messages.success(request, f'Test configuration "{config_name}" deleted successfully!')
+        return redirect('test_config_manage')
+    
+    context = {
+        'test_config': test_config,
+    }
+    return render(request, 'pcb_tracker/test_config_delete.html', context)
 
 
 def register(request):

@@ -14,11 +14,6 @@
                 <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
                 {% if user.is_authenticated %}
                     {% for group in user.groups.all %}
-                        {% if group.name == 'board_tester_lvl1' or group.name == 'board_tester_lvl2' %}
-                            <a class="nav-link" href="{% url 'pcb_test' %}">Test PCB</a>
-                        {% endif %}
-                    {% endfor %}
-                    {% for group in user.groups.all %}
                         {% if group.name == 'assembler_lvl1' %}
                             <a class="nav-link" href="{% url 'module_assemble' %}">Assemble Module</a>
                         {% endif %}
@@ -40,10 +35,12 @@
                                 <li><a class="dropdown-item" href="{% url 'pcb_type_create' %}">Create PCB Type</a></li>
                                 <li><a class="dropdown-item" href="{% url 'batch_create' %}">Create Batch</a></li>
                                 <li><a class="dropdown-item" href="{% url 'pcb_create' %}">Create PCB</a></li>
+                                <li><a class="dropdown-item" href="{% url 'pcb_test' %}">Test PCB</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="/admin/pcb_tracker/pcbtype/">Manage PCB Types (Admin)</a></li>
                                 <li><a class="dropdown-item" href="/admin/pcb_tracker/batch/">Manage Batches (Admin)</a></li>
                                 <li><a class="dropdown-item" href="/admin/pcb_tracker/pcb/">Manage PCBs (Admin)</a></li>
+                                <li><a class="dropdown-item" href="/admin/pcb_tracker/testmeasurement/">Manage Test Measurements (Admin)</a></li>
                             {% endif %}
                             
                             <!-- Show to users with specific permissions -->
@@ -59,6 +56,10 @@
                                     <li><a class="dropdown-item" href="{% url 'pcb_type_create' %}">Create PCB Type</a></li>
                                     <li><a class="dropdown-item" href="/admin/pcb_tracker/pcbtype/">Manage PCB Types</a></li>
                                     <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                
+                                {% if group.name == 'board_tester_lvl1' or group.name == 'board_tester_lvl2' %}
+                                    <li><a class="dropdown-item" href="{% url 'pcb_test' %}">Test PCB</a></li>
                                 {% endif %}
                             {% endfor %}
                             

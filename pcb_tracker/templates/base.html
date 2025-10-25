@@ -28,35 +28,48 @@
                             <a class="nav-link" href="{% url 'module_functional_test' %}">Test Module</a>
                         {% endif %}
                     {% endfor %}
-                    {% for group in user.groups.all %}
-                        {% if 'Manager' in group.name %}
-                            <a class="nav-link" href="{% url 'module_sign_off' %}">Sign Off</a>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="manageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Manage
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="manageDropdown">
+                    
+                    <!-- Manage Dropdown for all authenticated users -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="manageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Manage
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="manageDropdown">
+                            <!-- Show all options to admin users -->
+                            {% if user.is_staff %}
+                                <li><a class="dropdown-item" href="{% url 'pcb_type_create' %}">Create PCB Type</a></li>
+                                <li><a class="dropdown-item" href="{% url 'batch_create' %}">Create Batch</a></li>
+                                <li><a class="dropdown-item" href="{% url 'pcb_create' %}">Create PCB</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/admin/pcb_tracker/pcbtype/">Manage PCB Types (Admin)</a></li>
+                                <li><a class="dropdown-item" href="/admin/pcb_tracker/batch/">Manage Batches (Admin)</a></li>
+                                <li><a class="dropdown-item" href="/admin/pcb_tracker/pcb/">Manage PCBs (Admin)</a></li>
+                            {% endif %}
+                            
+                            <!-- Show to users with specific permissions -->
+                            {% for group in user.groups.all %}
+                                {% if 'Manager' in group.name %}
                                     <li><a class="dropdown-item" href="{% url 'pcb_type_create' %}">Create PCB Type</a></li>
                                     <li><a class="dropdown-item" href="{% url 'batch_create' %}">Create Batch</a></li>
                                     <li><a class="dropdown-item" href="{% url 'pcb_create' %}">Create PCB</a></li>
-                                </ul>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                    
-                    {% for group in user.groups.all %}
-                        {% if group.name == 'manage_pcb_type' %}
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="managePcbTypesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Manage PCB Types
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="managePcbTypesDropdown">
+                                    <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                
+                                {% if group.name == 'manage_pcb_type' %}
                                     <li><a class="dropdown-item" href="{% url 'pcb_type_create' %}">Create PCB Type</a></li>
-                                    <li><a class="dropdown-item" href="/admin/pcb_tracker/pcbtype/">Manage in Admin</a></li>
-                                </ul>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
+                                    <li><a class="dropdown-item" href="/admin/pcb_tracker/pcbtype/">Manage PCB Types</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            <!-- Show Sign Off only to managers -->
+                            {% for group in user.groups.all %}
+                                {% if 'Manager' in group.name %}
+                                    <li><a class="dropdown-item" href="{% url 'module_sign_off' %}">Sign Off Modules</a></li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </li>
                 {% endif %}
                 {% if user.is_staff %}
                     <a class="nav-link" href="/admin/">Admin</a>

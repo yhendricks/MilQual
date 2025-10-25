@@ -4,7 +4,7 @@ from . import views
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('pcb-type/manage/', views.pcb_type_manage, name='pcb_type_manage'),
-    path('batch/create/', views.batch_create, name='batch_create'),
+    path('batch/manage/', views.batch_manage, name='batch_manage'),
     path('pcb/test/', views.pcb_test, name='pcb_test'),
     path('pcb/create/', views.pcb_create, name='pcb_create'),
     path('pcb/<int:pcb_id>/verify/', views.pcb_qa_verify, name='pcb_qa_verify'),

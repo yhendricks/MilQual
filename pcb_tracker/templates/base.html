@@ -33,7 +33,7 @@
                             <!-- Show all options to admin users -->
                             {% if user.is_staff %}
                                 <li><a class="dropdown-item" href="{% url 'pcb_type_manage' %}">Manage PCB Types</a></li>
-                                <li><a class="dropdown-item" href="{% url 'batch_create' %}">Create Batch</a></li>
+                                <li><a class="dropdown-item" href="{% url 'batch_manage' %}">Manage Batches</a></li>
                                 <li><a class="dropdown-item" href="{% url 'pcb_create' %}">Create PCB</a></li>
                                 <li><a class="dropdown-item" href="{% url 'pcb_test' %}">Test PCB</a></li>
                                 <li><hr class="dropdown-divider"></li>
@@ -47,7 +47,7 @@
                             {% for group in user.groups.all %}
                                 {% if 'Manager' in group.name %}
                                     <li><a class="dropdown-item" href="{% url 'pcb_type_manage' %}">Manage PCB Types</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'batch_create' %}">Create Batch</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'batch_manage' %}">Manage Batches</a></li>
                                     <li><a class="dropdown-item" href="{% url 'pcb_create' %}">Create PCB</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                 {% endif %}

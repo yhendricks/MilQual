@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import Group, User
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden
 from django.core.exceptions import PermissionDenied
 from .models import PCB, Batch, TestMeasurement, FileAttachment, Module, ModuleTestRecord, PCBType
@@ -308,6 +309,48 @@ def pcb_type_manage(request):
         'pcb_types': pcb_types_page,
     }
     return render(request, 'pcb_tracker/pcb_type_manage.html', context)
+
+
+@login_required
+@user_passes_test(is_manager)  # Only managers can manage batches
+def batch_manage(request):
+    """View for managing batches with CRUD operations"""
+    if request.method == 'POST':
+        if 'create' in request.POST:
+            form = BatchCreateForm(request.POST)
+            if form.is_valid():
+                batch = form.save()
+                messages.success(request, f'Batch {batch.batch_number} created successfully!')
+                return redirect('batch_manage')
+        elif 'update' in request.POST:
+            batch_id = request.POST.get('batch_id')
+            batch = get_object_or_404(Batch, id=batch_id)
+            form = BatchCreateForm(request.POST, instance=batch)
+            if form.is_valid():
+                form.save()
+                messages.success(request, f'Batch {batch.batch_number} updated successfully!')
+                return redirect('batch_manage')
+        elif 'delete' in request.POST:
+            batch_id = request.POST.get('batch_id')
+            batch = get_object_or_404(Batch, id=batch_id)
+            batch_number = batch.batch_number
+            batch.delete()
+            messages.success(request, f'Batch {batch_number} deleted successfully!')
+            return redirect('batch_manage')
+    else:
+        form = BatchCreateForm()
+    
+    # Get all existing batches and paginate them
+    batches = Batch.objects.all().order_by('-production_date')
+    paginator = Paginator(batches, 10)  # Show 10 batches per page
+    page_number = request.GET.get('page')
+    batches_page = paginator.get_page(page_number)
+    
+    context = {
+        'form': form,
+        'batches': batches_page,
+    }
+    return render(request, 'pcb_tracker/batch_manage.html', context)
 
 
 @login_required

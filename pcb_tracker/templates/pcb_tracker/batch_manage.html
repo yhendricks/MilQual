@@ -127,7 +127,7 @@
                             {% endfor %}
                         </select>
                         {% if not pcb_types_for_modal %}
-                        <div class="text-warning mt-2">No PCB types available. Please create PCB types first.</div>
+                        <div class="text-warning mt-2">No PCB types available. Please create PCB types first from the Manage PCB Types page.</div>
                         {% endif %}
                     </div>
                     <div class="mb-3">
@@ -138,9 +138,6 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">Create Batch</button>
-                    {% if not form.pcb_type.queryset %}
-                    <a href="{% url 'pcb_type_manage' %}" class="btn btn-info">Create PCB Type</a>
-                    {% endif %}
                 </div>
             </form>
         </div>

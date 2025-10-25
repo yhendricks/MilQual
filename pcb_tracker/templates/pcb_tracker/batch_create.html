@@ -26,6 +26,15 @@
             </div>
             
             <div class="mb-3">
+                <label for="{{ form.pcb_type.id_for_label }}" class="form-label">PCB Type</label>
+                {{ form.pcb_type }}
+                {% if form.pcb_type.errors %}
+                    <div class="text-danger">{{ form.pcb_type.errors }}</div>
+                {% endif %}
+                <div class="form-text">Select the type of PCB for this batch</div>
+            </div>
+            
+            <div class="mb-3">
                 <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
                 {{ form.description }}
                 {% if form.description.errors %}

@@ -4,8 +4,8 @@ from django.contrib.auth.models import Group, User
 from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.core.exceptions import PermissionDenied
-from .models import PCB, Batch, TestMeasurement, FileAttachment, Module, ModuleTestRecord
-from .forms import PCBTestForm, FileAttachmentForm, ModuleAssemblyForm, ModuleTestForm, PCBCreateForm, BatchCreateForm
+from .models import PCB, Batch, TestMeasurement, FileAttachment, Module, ModuleTestRecord, PCBType
+from .forms import PCBTestForm, FileAttachmentForm, ModuleAssemblyForm, ModuleTestForm, PCBCreateForm, BatchCreateForm, PCBTypeForm
 
 
 def user_in_group(user, group_names):
@@ -264,6 +264,29 @@ def pcb_detail(request, pcb_id):
         'modules': modules,
     }
     return render(request, 'pcb_tracker/pcb_detail.html', context)
+
+
+@login_required
+@user_passes_test(is_manager)  # Only managers can create PCB types
+def pcb_type_create(request):
+    """View for managers to create new PCB types"""
+    if request.method == 'POST':
+        form = PCBTypeForm(request.POST)
+        if form.is_valid():
+            pcb_type = form.save()
+            messages.success(request, f'PCB Type {pcb_type.name} created successfully!')
+            return redirect('pcb_type_create')
+    else:
+        form = PCBTypeForm()
+    
+    # Get all existing PCB types
+    pcb_types = PCBType.objects.all()
+    
+    context = {
+        'form': form,
+        'pcb_types': pcb_types,
+    }
+    return render(request, 'pcb_tracker/pcb_type_create.html', context)
 
 
 @login_required

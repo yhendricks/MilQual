@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Create PCB Type - MilQual{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Create New PCB Type</h1>
+        <p class="lead">Define a new type of PCB for batch creation</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <h3>Enter PCB Type Details</h3>
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="{{ form.name.id_for_label }}" class="form-label">PCB Type Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="text-danger">{{ form.name.errors }}</div>
+                {% endif %}
+                <div class="form-text">Enter a unique name for this PCB type (e.g., PCB_A, PCB_B)</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="text-danger">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Create PCB Type</button>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+    
+    <div class="col-md-6">
+        <h3>Existing PCB Types</h3>
+        {% if pcb_types %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Batches Count</th>
+                            <th>Created Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pcb_type in pcb_types %}
+                        <tr>
+                            <td>{{ pcb_type.name }}</td>
+                            <td>{{ pcb_type.description|default:"No description" }}</td>
+                            <td>{{ pcb_type.batches.count }}</td>
+                            <td>{{ pcb_type.created_at|date:"M d, Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">No PCB types exist yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <h3>Next Steps</h3>
+        <p>After creating PCB types, you can create batches of specific PCB types.</p>
+        <a href="{% url 'batch_create' %}" class="btn btn-primary">Create Batch with PCB Type</a>
+    </div>
+</div>
+{% endblock %}

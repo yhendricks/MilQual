@@ -19,6 +19,7 @@
                 <thead class="table-dark">
                     <tr>
                         <th>Batch Number</th>
+                        <th>PCB Type</th>
                         <th>Description</th>
                         <th>PCBs Count</th>
                         <th>Production Date</th>
@@ -29,6 +30,7 @@
                     {% for batch in batches %}
                     <tr>
                         <td>{{ batch.batch_number }}</td>
+                        <td>{{ batch.pcb_type.name }}</td>
                         <td>{{ batch.description|default:"No description" }}</td>
                         <td>{{ batch.pcbs.count }}</td>
                         <td>{{ batch.production_date|date:"M d, Y H:i" }}</td>

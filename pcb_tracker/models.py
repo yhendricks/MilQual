@@ -3,15 +3,33 @@ from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
 
+class PCBType(models.Model):
+    """
+    Model to represent different types of PCBs
+    """
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ['name']
+
+
 class Batch(models.Model):
     """
     Model to represent a batch of PCBs
     """
     batch_number = models.CharField(max_length=100, unique=True)
+    pcb_type = models.ForeignKey(PCBType, on_delete=models.CASCADE, related_name='batches', null=True, blank=True)
     production_date = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
     
     def __str__(self):
+        if self.pcb_type:
+            return f"Batch {self.batch_number} ({self.pcb_type.name})"
         return f"Batch {self.batch_number}"
     
     class Meta:

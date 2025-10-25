@@ -1,5 +1,5 @@
 from django import forms
-from .models import Batch, PCB, TestMeasurement, FileAttachment, Module, ModuleTestRecord
+from .models import Batch, PCB, TestMeasurement, FileAttachment, Module, ModuleTestRecord, PCBType
 
 
 class PCBTestForm(forms.Form):
@@ -118,7 +118,21 @@ class ModuleTestForm(forms.ModelForm):
 class BatchCreateForm(forms.ModelForm):
     class Meta:
         model = Batch
-        fields = ['batch_number', 'description']
+        fields = ['batch_number', 'pcb_type', 'description']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Only show PCB types that exist
+        self.fields['pcb_type'].queryset = PCBType.objects.all()
+
+
+class PCBTypeForm(forms.ModelForm):
+    class Meta:
+        model = PCBType
+        fields = ['name', 'description']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
         }

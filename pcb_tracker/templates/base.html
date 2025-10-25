@@ -31,6 +31,8 @@
                     {% for group in user.groups.all %}
                         {% if 'Manager' in group.name %}
                             <a class="nav-link" href="{% url 'module_sign_off' %}">Sign Off</a>
+                            <a class="nav-link" href="{% url 'batch_create' %}">Create Batch</a>
+                            <a class="nav-link" href="{% url 'pcb_create' %}">Create PCB</a>
                         {% endif %}
                     {% endfor %}
                 {% endif %}

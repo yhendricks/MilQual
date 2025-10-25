@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.http import HttpResponseForbidden
 from django.core.exceptions import PermissionDenied
 from .models import PCB, Batch, TestMeasurement, FileAttachment, Module, ModuleTestRecord
-from .forms import PCBTestForm, FileAttachmentForm, ModuleAssemblyForm, ModuleTestForm, PCBCreateForm
+from .forms import PCBTestForm, FileAttachmentForm, ModuleAssemblyForm, ModuleTestForm, PCBCreateForm, BatchCreateForm
 
 
 def user_in_group(user, group_names):
@@ -245,6 +245,29 @@ def pcb_detail(request, pcb_id):
         'modules': modules,
     }
     return render(request, 'pcb_tracker/pcb_detail.html', context)
+
+
+@login_required
+@user_passes_test(is_manager)  # Only managers can create batches
+def batch_create(request):
+    """View for managers to create new batches"""
+    if request.method == 'POST':
+        form = BatchCreateForm(request.POST)
+        if form.is_valid():
+            batch = form.save()
+            messages.success(request, f'Batch {batch.batch_number} created successfully!')
+            return redirect('batch_create')
+    else:
+        form = BatchCreateForm()
+    
+    # Get all existing batches
+    batches = Batch.objects.all()
+    
+    context = {
+        'form': form,
+        'batches': batches,
+    }
+    return render(request, 'pcb_tracker/batch_create.html', context)
 
 
 @login_required

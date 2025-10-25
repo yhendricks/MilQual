@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
+    path('batch/create/', views.batch_create, name='batch_create'),
     path('pcb/test/', views.pcb_test, name='pcb_test'),
     path('pcb/create/', views.pcb_create, name='pcb_create'),
     path('pcb/<int:pcb_id>/verify/', views.pcb_qa_verify, name='pcb_qa_verify'),

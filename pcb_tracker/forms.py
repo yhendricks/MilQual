@@ -115,6 +115,15 @@ class ModuleTestForm(forms.ModelForm):
         self.fields['module'].queryset = Module.objects.filter(status='assembled')
 
 
+class BatchCreateForm(forms.ModelForm):
+    class Meta:
+        model = Batch
+        fields = ['batch_number', 'description']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
+
+
 class PCBCreateForm(forms.ModelForm):
     class Meta:
         model = PCB

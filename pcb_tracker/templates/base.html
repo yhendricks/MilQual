@@ -31,15 +31,11 @@
                     {% for group in user.groups.all %}
                         {% if 'Manager' in group.name %}
                             <a class="nav-link" href="{% url 'module_sign_off' %}">Sign Off</a>
-                        {% endif %}
-                    {% endfor %}
-                    {% for group in user.groups.all %}
-                        {% if 'Manager' in group.name %}
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="createDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Create
+                                <a class="nav-link dropdown-toggle" href="#" id="manageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Manage
                                 </a>
-                                <ul class="dropdown-menu" aria-labelledby="createDropdown">
+                                <ul class="dropdown-menu" aria-labelledby="manageDropdown">
                                     <li><a class="dropdown-item" href="{% url 'pcb_type_create' %}">Create PCB Type</a></li>
                                     <li><a class="dropdown-item" href="{% url 'batch_create' %}">Create Batch</a></li>
                                     <li><a class="dropdown-item" href="{% url 'pcb_create' %}">Create PCB</a></li>

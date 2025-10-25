@@ -36,6 +36,7 @@ def create_user_groups(apps, schema_editor):
     # Define permissions for each group
     pcb_content_type = ContentType.objects.get_for_model(apps.get_model('pcb_tracker', 'PCB'))
     batch_content_type = ContentType.objects.get_for_model(apps.get_model('pcb_tracker', 'Batch'))
+    pcb_type_content_type = ContentType.objects.get_for_model(apps.get_model('pcb_tracker', 'PCBType'))
     test_measurement_content_type = ContentType.objects.get_for_model(apps.get_model('pcb_tracker', 'TestMeasurement'))
     module_content_type = ContentType.objects.get_for_model(apps.get_model('pcb_tracker', 'Module'))
     module_test_record_content_type = ContentType.objects.get_for_model(apps.get_model('pcb_tracker', 'ModuleTestRecord'))
@@ -53,6 +54,21 @@ def create_user_groups(apps, schema_editor):
             
             # Can add and view file attachments
             {'codename': 'add_fileattachment', 'content_type': file_attachment_content_type},
+            {'codename': 'view_fileattachment', 'content_type': file_attachment_content_type},
+        ],
+        
+        'Manager_lvl1': [
+            # Can view everything
+            {'codename': 'add_pcbtype', 'content_type': pcb_type_content_type},
+            {'codename': 'view_pcbtype', 'content_type': pcb_type_content_type},
+            {'codename': 'change_pcbtype', 'content_type': pcb_type_content_type},
+            {'codename': 'delete_pcbtype', 'content_type': pcb_type_content_type},
+            
+            {'codename': 'view_pcb', 'content_type': pcb_content_type},
+            {'codename': 'view_batch', 'content_type': batch_content_type},
+            {'codename': 'view_testmeasurement', 'content_type': test_measurement_content_type},
+            {'codename': 'view_module', 'content_type': module_content_type},
+            {'codename': 'view_moduletestrecord', 'content_type': module_test_record_content_type},
             {'codename': 'view_fileattachment', 'content_type': file_attachment_content_type},
         ],
         
@@ -111,6 +127,23 @@ def create_user_groups(apps, schema_editor):
             {'codename': 'add_module', 'content_type': module_content_type},
             {'codename': 'view_module', 'content_type': module_content_type},
             {'codename': 'change_module', 'content_type': module_content_type},
+        ],
+        
+        'Manager_lvl2': [
+            # Can view and change everything including PCB types
+            {'codename': 'add_pcbtype', 'content_type': pcb_type_content_type},
+            {'codename': 'view_pcbtype', 'content_type': pcb_type_content_type},
+            {'codename': 'change_pcbtype', 'content_type': pcb_type_content_type},
+            {'codename': 'delete_pcbtype', 'content_type': pcb_type_content_type},
+            
+            {'codename': 'view_pcb', 'content_type': pcb_content_type},
+            {'codename': 'change_pcb', 'content_type': pcb_content_type},
+            {'codename': 'view_batch', 'content_type': batch_content_type},
+            {'codename': 'view_testmeasurement', 'content_type': test_measurement_content_type},
+            {'codename': 'view_module', 'content_type': module_content_type},
+            {'codename': 'change_module', 'content_type': module_content_type},
+            {'codename': 'view_moduletestrecord', 'content_type': module_test_record_content_type},
+            {'codename': 'view_fileattachment', 'content_type': file_attachment_content_type},
         ],
         
         'Function_tester_lvl1': [
@@ -175,7 +208,12 @@ def create_user_groups(apps, schema_editor):
         ],
         
         'Admin': [
-            # All permissions
+            # All permissions including PCB types
+            {'codename': 'add_pcbtype', 'content_type': pcb_type_content_type},
+            {'codename': 'view_pcbtype', 'content_type': pcb_type_content_type},
+            {'codename': 'change_pcbtype', 'content_type': pcb_type_content_type},
+            {'codename': 'delete_pcbtype', 'content_type': pcb_type_content_type},
+            
             {'codename': 'add_pcb', 'content_type': pcb_content_type},
             {'codename': 'view_pcb', 'content_type': pcb_content_type},
             {'codename': 'change_pcb', 'content_type': pcb_content_type},

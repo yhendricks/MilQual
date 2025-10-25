@@ -225,13 +225,24 @@ def pcb_test(request):
         form = PCBTestForm(user=request.user)
         attachment_form = FileAttachmentForm()
     
-    # Get PCBs that are pending testing
+    # Get PCBs that are pending testing with search and pagination
+    search_query = request.GET.get('search', '')
+    
     pending_pcbs = PCB.objects.filter(status='pending')
+    
+    if search_query:
+        pending_pcbs = pending_pcbs.filter(serial_number__icontains=search_query)
+    
+    # Add pagination
+    paginator = Paginator(pending_pcbs, 10)  # 10 PCBs per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     
     context = {
         'form': form,
         'attachment_form': attachment_form,
-        'pending_pcbs': pending_pcbs,
+        'pending_pcbs': page_obj,  # Paginated and filtered results
+        'search_query': search_query,
     }
     return render(request, 'pcb_tracker/pcb_test.html', context)
 

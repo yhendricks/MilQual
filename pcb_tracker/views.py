@@ -266,6 +266,8 @@ def pcb_detail(request, pcb_id):
     return render(request, 'pcb_tracker/pcb_detail.html', context)
 
 
+from django.core.paginator import Paginator
+
 @login_required
 @user_passes_test(lambda u: user_in_group(u, ['manage_pcb_type', 'Manager_lvl1', 'Manager_lvl2', 'Admin']))
 def pcb_type_manage(request):
@@ -295,12 +297,15 @@ def pcb_type_manage(request):
     else:
         form = PCBTypeForm()
     
-    # Get all existing PCB types
-    pcb_types = PCBType.objects.all()
+    # Get all existing PCB types and paginate them
+    pcb_types = PCBType.objects.all().order_by('name')
+    paginator = Paginator(pcb_types, 10)  # Show 10 PCB types per page
+    page_number = request.GET.get('page')
+    pcb_types_page = paginator.get_page(page_number)
     
     context = {
         'form': form,
-        'pcb_types': pcb_types,
+        'pcb_types': pcb_types_page,
     }
     return render(request, 'pcb_tracker/pcb_type_manage.html', context)
 

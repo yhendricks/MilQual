@@ -56,6 +56,9 @@ def dashboard(request):
     modules_assembled = Module.objects.filter(status='assembled').count()
     modules_functional_tested = Module.objects.filter(status='functional_tested').count()
     
+    # Get batches for managers
+    batches = Batch.objects.all() if is_manager(request.user) else Batch.objects.none()
+    
     context = {
         'pcb_count': pcb_count,
         'pcb_pending': pcb_pending,
@@ -64,6 +67,7 @@ def dashboard(request):
         'module_count': module_count,
         'modules_assembled': modules_assembled,
         'modules_functional_tested': modules_functional_tested,
+        'batches': batches,
     }
     return render(request, 'pcb_tracker/dashboard.html', context)
 

@@ -30,8 +30,8 @@
                             Manage Workflow
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="manageWorkflowDropdown">
-                            <!-- Show all options to admin users -->
                             {% if user.is_staff %}
+                                <!-- Admin users get all options -->
                                 <li><a class="dropdown-item" href="{% url 'pcb_type_manage' %}">Manage PCB Types</a></li>
                                 <li><a class="dropdown-item" href="{% url 'batch_manage' %}">Manage Batches</a></li>
                                 <li><a class="dropdown-item" href="{% url 'pcb_manage' %}">Manage PCBs</a></li>
@@ -42,52 +42,83 @@
                                 <li><a class="dropdown-item" href="/admin/pcb_tracker/batch/">Manage Batches (Admin)</a></li>
                                 <li><a class="dropdown-item" href="/admin/pcb_tracker/pcb/">Manage PCBs (Admin)</a></li>
                                 <li><a class="dropdown-item" href="/admin/pcb_tracker/testmeasurement/">Manage Test Measurements (Admin)</a></li>
-                            {% elif user.groups.all %}
-                                <!-- Show to users with specific permissions -->
-                                {% for group in user.groups.all %}
-                                    {% if 'Manager' in group.name %}
-                                        <li><a class="dropdown-item" href="{% url 'pcb_type_manage' %}">Manage PCB Types</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'batch_manage' %}">Manage Batches</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'pcb_manage' %}">Manage PCBs</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                    {% endif %}
-                                    
-                                    {% if group.name == 'manage_pcb_type' %}
-                                        <li><a class="dropdown-item" href="{% url 'pcb_type_manage' %}">Manage PCB Types</a></li>
-                                        <li><a class="dropdown-item" href="/admin/pcb_tracker/pcbtype/">Manage PCB Types</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                    {% endif %}
-                                    
-                                    {% if group.name == 'board_tester_lvl1' or group.name == 'board_tester_lvl2' %}
-                                        <li><a class="dropdown-item" href="{% url 'pcb_test' %}">Test PCB</a></li>
-                                    {% endif %}
-                                    
-                                    {% if group.name == 'test_config_manager' %}
-                                        <li><a class="dropdown-item" href="{% url 'test_config_manage' %}">Manage Test Configurations</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                    {% endif %}
-                                    
-                                    {% if group.name == 'pcb_manager' %}
-                                        <li><a class="dropdown-item" href="{% url 'pcb_manage' %}">Manage PCBs</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                    {% endif %}
-                                {% endfor %}
-                                
-                                <!-- Show Sign Off only to managers -->
-                                {% for group in user.groups.all %}
-                                    {% if 'Manager' in group.name %}
-                                        <li><a class="dropdown-item" href="{% url 'module_sign_off' %}">Sign Off Modules</a></li>
-                                    {% endif %}
-                                {% endfor %}
                             {% else %}
-                                <!-- Show message for users with no groups -->
-                                <li class="dropdown-item-text text-muted">
-                                    <em>No workflow permissions assigned</em>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li class="dropdown-item-text text-muted">
-                                    <small>Please contact your administrator to assign workflow permissions.</small>
-                                </li>
+                                <!-- Show options based on user permissions -->
+                                {% if user.groups.all %}
+                                    <!-- Track which items we've already added to avoid duplicates -->
+                                    {% with pcb_type_added=False batch_added=False pcb_added=False test_added=False test_config_added=False sign_off_added=False %}
+                                    
+                                    <!-- Simple approach: Check for each permission type only once -->
+                                    {% if user.groups.all|length > 0 %}
+                                        <!-- PCB Type Management - Check if user has access -->
+                                        {% for group in user.groups.all %}
+                                            {% if 'manage_pcb_type' in group.name or 'Manager' in group.name %}
+                                                <li><a class="dropdown-item" href="{% url 'pcb_type_manage' %}">Manage PCB Types</a></li>
+                                                {% break %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        
+                                        <!-- Batch Management - Check if user has access -->
+                                        {% for group in user.groups.all %}
+                                            {% if 'Manager' in group.name %}
+                                                <li><a class="dropdown-item" href="{% url 'batch_manage' %}">Manage Batches</a></li>
+                                                {% break %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        
+                                        <!-- PCB Management - Check if user has access -->
+                                        {% for group in user.groups.all %}
+                                            {% if 'pcb_manager' in group.name %}
+                                                <li><a class="dropdown-item" href="{% url 'pcb_manage' %}">Manage PCBs</a></li>
+                                                {% break %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        
+                                        <!-- PCB Testing - Check if user has access -->
+                                        {% for group in user.groups.all %}
+                                            {% if 'board_tester_lvl1' in group.name or 'board_tester_lvl2' in group.name %}
+                                                <li><a class="dropdown-item" href="{% url 'pcb_test' %}">Test PCB</a></li>
+                                                {% break %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        
+                                        <!-- Test Configuration Management - Check if user has access -->
+                                        {% for group in user.groups.all %}
+                                            {% if 'test_config_manager' in group.name %}
+                                                <li><a class="dropdown-item" href="{% url 'test_config_manage' %}">Manage Test Configurations</a></li>
+                                                {% break %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        
+                                        <!-- Module Sign Off - Check if user has access -->
+                                        {% for group in user.groups.all %}
+                                            {% if 'Manager' in group.name %}
+                                                <li><a class="dropdown-item" href="{% url 'module_sign_off' %}">Sign Off Modules</a></li>
+                                                {% break %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        
+                                        <li><hr class="dropdown-divider"></li>
+                                    {% else %}
+                                        <!-- Show message for users with no groups -->
+                                        <li class="dropdown-item-text text-muted">
+                                            <em>No workflow permissions assigned</em>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li class="dropdown-item-text text-muted">
+                                            <small>Please contact your administrator to assign workflow permissions.</small>
+                                        </li>
+                                    {% endif %}
+                                {% else %}
+                                    <!-- Show message for users with no groups -->
+                                    <li class="dropdown-item-text text-muted">
+                                        <em>No workflow permissions assigned</em>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li class="dropdown-item-text text-muted">
+                                        <small>Please contact your administrator to assign workflow permissions.</small>
+                                    </li>
+                                {% endif %}
                             {% endif %}
                         </ul>
                     </li>

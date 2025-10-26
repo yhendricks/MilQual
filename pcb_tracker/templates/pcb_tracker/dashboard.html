@@ -93,34 +93,4 @@
     </div>
 </div>
 {% endif %}
-
-<div class="row mt-4">
-    <div class="col-md-12">
-        <h3>Quick Actions</h3>
-        <div class="btn-group" role="group">
-            {% for group in user.groups.all %}
-                {% if group.name == 'board_tester_lvl1' or group.name == 'board_tester_lvl2' %}
-                    <a href="{% url 'pcb_test' %}" class="btn btn-primary">Test PCB</a>
-                {% endif %}
-            {% endfor %}
-            {% for group in user.groups.all %}
-                {% if group.name == 'assembler_lvl1' %}
-                    <a href="{% url 'module_assemble' %}" class="btn btn-primary">Assemble Module</a>
-                {% endif %}
-            {% endfor %}
-            {% for group in user.groups.all %}
-                {% if 'Function_tester' in group.name or 'Environmental_tester' in group.name %}
-                    <a href="{% url 'module_functional_test' %}" class="btn btn-primary">Test Module</a>
-                {% endif %}
-            {% endfor %}
-            {% for group in user.groups.all %}
-                {% if 'Manager' in group.name %}
-                    <a href="{% url 'module_sign_off' %}" class="btn btn-primary">Sign Off Modules</a>
-                    <a href="{% url 'batch_manage' %}" class="btn btn-primary">Manage Batches</a>
-                    <a href="{% url 'pcb_manage' %}" class="btn btn-primary">Manage PCBs</a>
-                {% endif %}
-            {% endfor %}
-        </div>
-    </div>
-</div>
 {% endblock %}

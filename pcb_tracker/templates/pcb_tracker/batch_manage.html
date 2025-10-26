@@ -200,12 +200,18 @@
                     <p>Are you sure you want to delete the batch "<strong>{{ batch.batch_number }}</strong>"?</p>
                     <p class="text-danger">This action cannot be undone.</p>
                     {% if batch.pcbs.count > 0 %}
-                    <p class="text-warning">Warning: This batch contains {{ batch.pcbs.count }} PCB(s). Deleting this batch will affect those PCBs.</p>
+                    <p class="text-warning">
+                        Warning: This batch contains {{ batch.pcbs.count }} PCB(s) and cannot be deleted. Remove or reassign PCBs first.
+                    </p>
                     {% endif %}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    {% if batch.pcbs.count > 0 %}
+                    <button type="submit" class="btn btn-danger" disabled>Cannot Delete</button>
+                    {% else %}
                     <button type="submit" class="btn btn-danger">Delete Batch</button>
+                    {% endif %}
                 </div>
             </form>
         </div>

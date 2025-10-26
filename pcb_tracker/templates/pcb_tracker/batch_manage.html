@@ -166,7 +166,7 @@
                     <div class="mb-3">
                         <label for="edit_pcb_type_{{ batch.id }}" class="form-label">PCB Type</label>
                         <select class="form-select" id="edit_pcb_type_{{ batch.id }}" name="pcb_type" required>
-                            {% for pcb_type in form.pcb_type.queryset %}
+                            {% for pcb_type in pcb_types_for_modal %}
                                 <option value="{{ pcb_type.id }}" {% if pcb_type.id == batch.pcb_type.id %}selected{% endif %}>{{ pcb_type.name }}</option>
                             {% endfor %}
                         </select>

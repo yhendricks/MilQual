@@ -43,56 +43,38 @@
                                 <li><a class="dropdown-item" href="/admin/pcb_tracker/pcb/">Manage PCBs (Admin)</a></li>
                                 <li><a class="dropdown-item" href="/admin/pcb_tracker/testmeasurement/">Manage Test Measurements (Admin)</a></li>
                             {% else %}
-                                <!-- Show options based on user permissions -->
+                                <!-- Show options based on user permissions - deduplicated -->
                                 {% if user.groups.all %}
-                                    <!-- Show PCB Types Management -->
                                     {% for group in user.groups.all %}
                                         {% if 'manage_pcb_type' in group.name or 'Manager' in group.name %}
                                             <li><a class="dropdown-item" href="{% url 'pcb_type_manage' %}">Manage PCB Types</a></li>
-                                            {% if forloop.first %}{% endif %}
                                         {% endif %}
                                     {% endfor %}
-                                    
-                                    <!-- Show Batches Management -->
                                     {% for group in user.groups.all %}
                                         {% if 'Manager' in group.name %}
                                             <li><a class="dropdown-item" href="{% url 'batch_manage' %}">Manage Batches</a></li>
-                                            {% if forloop.first %}{% endif %}
                                         {% endif %}
                                     {% endfor %}
-                                    
-                                    <!-- Show PCBs Management -->
                                     {% for group in user.groups.all %}
                                         {% if 'pcb_manager' in group.name %}
                                             <li><a class="dropdown-item" href="{% url 'pcb_manage' %}">Manage PCBs</a></li>
-                                            {% if forloop.first %}{% endif %}
                                         {% endif %}
                                     {% endfor %}
-                                    
-                                    <!-- Show PCB Testing -->
                                     {% for group in user.groups.all %}
-                                        {% if 'board_tester_lvl1' in group.name or 'board_tester_lvl2' in group.name %}
+                                        {% if 'pcb_testing' in group.name %}
                                             <li><a class="dropdown-item" href="{% url 'pcb_test' %}">Test PCB</a></li>
-                                            {% if forloop.first %}{% endif %}
                                         {% endif %}
                                     {% endfor %}
-                                    
-                                    <!-- Show Test Configurations Management -->
                                     {% for group in user.groups.all %}
                                         {% if 'test_config_manager' in group.name %}
                                             <li><a class="dropdown-item" href="{% url 'test_config_manage' %}">Manage Test Configurations</a></li>
-                                            {% if forloop.first %}{% endif %}
                                         {% endif %}
                                     {% endfor %}
-                                    
-                                    <!-- Show Module Sign Off -->
                                     {% for group in user.groups.all %}
                                         {% if 'Manager' in group.name %}
                                             <li><a class="dropdown-item" href="{% url 'module_sign_off' %}">Sign Off Modules</a></li>
-                                            {% if forloop.first %}{% endif %}
                                         {% endif %}
                                     {% endfor %}
-                                    
                                     <li><hr class="dropdown-divider"></li>
                                 {% else %}
                                     <!-- Show message for users with no groups -->

@@ -9,8 +9,7 @@ def create_user_groups(apps, schema_editor):
     
     # Define the groups to create
     groups_config = [
-        {'name': 'board_tester_lvl1', 'level': 1, 'department': 'Testing', 'description': 'Level 1 Board Tester - Tests individual PCBs'},
-        {'name': 'board_tester_lvl2', 'level': 2, 'department': 'Testing', 'description': 'Level 2 Board Tester - Tests individual PCBs with advanced capabilities'},
+        {'name': 'pcb_testing', 'level': 1, 'department': 'Testing', 'description': 'PCB Testing - Tests individual PCBs'},
         {'name': 'assembler_lvl1', 'level': 1, 'department': 'Assembly', 'description': 'Level 1 Assembler - Assembles PCBs into modules'},
         {'name': 'QA_lvl1', 'level': 1, 'department': 'Quality Assurance', 'description': 'Level 1 Quality Assurance - Verifies test results and approves for next stage'},
         {'name': 'QA_lvl2', 'level': 2, 'department': 'Quality Assurance', 'description': 'Level 2 Quality Assurance - Advanced QA with additional permissions'},
@@ -56,7 +55,7 @@ def create_user_groups(apps, schema_editor):
         test_question_content_type = None
     
     permissions_config = {
-        'board_tester_lvl1': [
+        'pcb_testing': [
             # Can add and view PCBs
             {'codename': 'add_pcb', 'content_type': pcb_content_type},
             {'codename': 'view_pcb', 'content_type': pcb_content_type},
@@ -85,20 +84,7 @@ def create_user_groups(apps, schema_editor):
             {'codename': 'view_fileattachment', 'content_type': file_attachment_content_type},
         ],
         
-        'board_tester_lvl2': [
-            # Same as lvl1 but with additional permissions
-            {'codename': 'add_pcb', 'content_type': pcb_content_type},
-            {'codename': 'view_pcb', 'content_type': pcb_content_type},
-            {'codename': 'change_pcb', 'content_type': pcb_content_type},
-            
-            {'codename': 'add_testmeasurement', 'content_type': test_measurement_content_type},
-            {'codename': 'view_testmeasurement', 'content_type': test_measurement_content_type},
-            {'codename': 'change_testmeasurement', 'content_type': test_measurement_content_type},
-            
-            {'codename': 'add_fileattachment', 'content_type': file_attachment_content_type},
-            {'codename': 'view_fileattachment', 'content_type': file_attachment_content_type},
-        ],
-        
+
         'assembler_lvl1': [
             # Can view PCBs (only approved ones)
             {'codename': 'view_pcb', 'content_type': pcb_content_type},
@@ -313,7 +299,7 @@ def reverse_create_user_groups(apps, schema_editor):
     
     # Delete the groups we created
     group_names = [
-        'board_tester_lvl1', 'board_tester_lvl2', 'assembler_lvl1',
+        'pcb_testing', 'assembler_lvl1',
         'QA_lvl1', 'QA_lvl2', 'Function_tester_lvl1', 'Function_tester_lvl2',
         'Environmental_tester_lvl1', 'Manager_lvl1', 'Manager_lvl2', 'Admin'
     ]

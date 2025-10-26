@@ -65,7 +65,7 @@
                     <ul class="list-group">
                         {% for attachment in attachments %}
                             <li class="list-group-item">
-                                <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.file.name|basename }}</a>
+                                <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.file.name }}</a>
                                 <span class="badge bg-secondary">{{ attachment.get_file_type_display }}</span>
                                 <p class="text-muted small mb-0">{{ attachment.description|default:"No description" }}</p>
                                 <small class="text-muted">Uploaded by {{ attachment.uploaded_by.username }} on {{ attachment.upload_date|date:"M d, Y H:i" }}</small>

@@ -202,9 +202,13 @@
                     <div class="mb-3">
                         <label for="edit_batch_{{ pcb.id }}" class="form-label">Batch</label>
                         <select class="form-select" id="edit_batch_{{ pcb.id }}" name="batch" required>
-                            {% for batch in form.batch.queryset %}
-                                <option value="{{ batch.id }}" {% if batch.id == pcb.batch.id %}selected{% endif %}>{{ batch.batch_number }} ({{ batch.pcb_type.name }})</option>
-                            {% endfor %}
+                            {% if all_batches %}
+                                {% for batch in all_batches %}
+                                    <option value="{{ batch.id }}" {% if batch.id == pcb.batch.id %}selected{% endif %}>{{ batch.batch_number }} ({{ batch.pcb_type.name }})</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="">No batches available - create batches first</option>
+                            {% endif %}
                         </select>
                     </div>
                     
@@ -212,9 +216,13 @@
                         <label for="edit_test_config_{{ pcb.id }}" class="form-label">Test Configuration</label>
                         <select class="form-select" id="edit_test_config_{{ pcb.id }}" name="test_config">
                             <option value="">No test configuration</option>
-                            {% for test_config in form.test_config.queryset %}
-                                <option value="{{ test_config.id }}" {% if test_config.id == pcb.test_config.id %}selected{% endif %}>{{ test_config.name }}</option>
-                            {% endfor %}
+                            {% if all_test_configs %}
+                                {% for test_config in all_test_configs %}
+                                    <option value="{{ test_config.id }}" {% if test_config.id == pcb.test_config.id %}selected{% endif %}>{{ test_config.name }}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="">No test configurations available - create test configs first</option>
+                            {% endif %}
                         </select>
                     </div>
                     

@@ -17,8 +17,8 @@ def user_in_group(user, group_names):
 
 
 def can_test_pcb(user):
-    """Check if user can test PCBs (board_tester groups)"""
-    return user_in_group(user, ['board_tester_lvl1', 'board_tester_lvl2'])
+    """Check if user can test PCBs (pcb_testing group)"""
+    return user_in_group(user, ['pcb_testing'])
 
 
 def can_verify_pcb(user):
@@ -188,8 +188,57 @@ def batch_manage(request):
 
 @login_required
 @user_passes_test(is_manager)  # Only managers can manage batches
+def batch_manage(request):
+    """View for managing batches with CRUD operations"""
+    if request.method == 'POST':
+        if 'create' in request.POST:
+            form = BatchCreateForm(request.POST)
+            if form.is_valid():
+                batch = form.save()
+                messages.success(request, f'Batch {batch.batch_number} created successfully!')
+                return redirect('batch_manage')
+        elif 'update' in request.POST:
+            batch_id = request.POST.get('batch_id')
+            batch = get_object_or_404(Batch, id=batch_id)
+            form = BatchCreateForm(request.POST, instance=batch)
+            if form.is_valid():
+                form.save()
+                messages.success(request, f'Batch {batch.batch_number} updated successfully!')
+                return redirect('batch_manage')
+        elif 'delete' in request.POST:
+            batch_id = request.POST.get('batch_id')
+            batch = get_object_or_404(Batch, id=batch_id)
+            batch_number = batch.batch_number
+            
+            # Check if the batch has any PCBs associated with it
+            if batch.pcbs.count() > 0:
+                messages.error(request, f'Cannot delete batch {batch_number} because it contains {batch.pcbs.count()} PCB(s). Remove PCBs first.')
+                return redirect('batch_manage')
+            
+            batch.delete()
+            messages.success(request, f'Batch {batch_number} deleted successfully!')
+            return redirect('batch_manage')
+    else:
+        form = BatchCreateForm()
+    
+    # Force refresh the form's queryset for the PCBType field
+    form.fields['pcb_type'].queryset = PCBType.objects.all()
+    
+    # Get all existing batches and paginate them
+    batches = Batch.objects.all().order_by('-production_date')
+    paginator = Paginator(batches, 10)  # Show 10 batches per page
+    page_number = request.GET.get('page')
+    batches_page = paginator.get_page(page_number)
+    
+    context = {
+        'form': form,
+        'batches': batches_page,
+    }
+    return render(request, 'pcb_tracker/batch_manage.html', context)
+
 
 @login_required
+@user_passes_test(can_test_pcb)
 def pcb_test(request):
     """View for board testers to enter PCB test measurements based on test configuration"""
     if request.method == 'POST':
@@ -471,6 +520,10 @@ def pcb_manage(request):
                 pass
     else:
         form = PCBCreateForm()
+        # Force refresh the form's querysets to ensure dropdowns have options
+        # Use unfiltered queries to bypass any potential permission filtering
+        form.fields['batch'].queryset = Batch.objects.all().distinct()
+        form.fields['test_config'].queryset = TestConfig.objects.all().distinct()
     
     # Handle search and pagination for displaying PCBs
     search_query = request.GET.get('search', '')
@@ -491,10 +544,16 @@ def pcb_manage(request):
     page_number = request.GET.get('page')
     pcbs_page = paginator.get_page(page_number)
     
+    # Add batch and test config querysets explicitly for template use
+    all_batches = Batch.objects.all()
+    all_test_configs = TestConfig.objects.all()
+    
     context = {
         'form': form,
         'pcbs': pcbs_page,
         'search_query': search_query,
+        'all_batches': all_batches,
+        'all_test_configs': all_test_configs,
     }
     return render(request, 'pcb_tracker/pcb_manage.html', context)
 

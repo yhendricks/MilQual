@@ -60,9 +60,20 @@ def create_user_groups(apps, schema_editor):
             {'codename': 'add_testmeasurement', 'content_type': test_measurement_content_type},
             {'codename': 'view_testmeasurement', 'content_type': test_measurement_content_type},
             
+            # Can add and view parameter measurements
+            {'codename': 'add_parametermeasurement', 'content_type': parameter_measurement_content_type},
+            {'codename': 'view_parametermeasurement', 'content_type': parameter_measurement_content_type},
+            
+            # Can add and view question responses
+            {'codename': 'add_questionresponse', 'content_type': question_response_content_type},
+            {'codename': 'view_questionresponse', 'content_type': question_response_content_type},
+            
             # Can add and view file attachments
             {'codename': 'add_fileattachment', 'content_type': file_attachment_content_type},
             {'codename': 'view_fileattachment', 'content_type': file_attachment_content_type},
+            
+            # Can change PCB status after testing
+            {'codename': 'change_pcb', 'content_type': pcb_content_type},
         ],
         
         'Manager_lvl1': [

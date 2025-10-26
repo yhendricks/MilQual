@@ -34,7 +34,7 @@
                             {% if user.is_staff %}
                                 <li><a class="dropdown-item" href="{% url 'pcb_type_manage' %}">Manage PCB Types</a></li>
                                 <li><a class="dropdown-item" href="{% url 'batch_manage' %}">Manage Batches</a></li>
-                                <li><a class="dropdown-item" href="{% url 'pcb_create' %}">Create PCB</a></li>
+                                <li><a class="dropdown-item" href="{% url 'pcb_manage' %}">Manage PCBs</a></li>
                                 <li><a class="dropdown-item" href="{% url 'pcb_test' %}">Test PCB</a></li>
                                 <li><a class="dropdown-item" href="{% url 'test_config_manage' %}">Manage Test Configurations</a></li>
                                 <li><hr class="dropdown-divider"></li>
@@ -48,7 +48,7 @@
                                     {% if 'Manager' in group.name %}
                                         <li><a class="dropdown-item" href="{% url 'pcb_type_manage' %}">Manage PCB Types</a></li>
                                         <li><a class="dropdown-item" href="{% url 'batch_manage' %}">Manage Batches</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'pcb_create' %}">Create PCB</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'pcb_manage' %}">Manage PCBs</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                     {% endif %}
                                     

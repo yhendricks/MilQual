@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage PCBs - MilQual{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Manage PCBs</h1>
+        <p class="lead">Create, view, update, and delete PCB entries</p>
+    </div>
+</div>
+
+<!-- Add New PCB Button -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+            Add New PCB
+        </button>
+    </div>
+</div>
+
+<!-- PCBs Table -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <!-- Search Form -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <form method="get" class="d-flex">
+                    <input type="text" class="form-control me-2" name="search" placeholder="Search PCBs..." value="{{ search_query }}">
+                    <button type="submit" class="btn btn-outline-primary">Search</button>
+                    {% if search_query %}
+                    <a href="{% url 'pcb_manage' %}" class="btn btn-outline-secondary ms-2">Clear</a>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+        
+        <h3>Existing PCBs</h3>
+        {% if pcbs %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Serial Number</th>
+                            <th>Batch</th>
+                            <th>PCB Type</th>
+                            <th>Test Config</th>
+                            <th>Status</th>
+                            <th>Created Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pcb in pcbs %}
+                        <tr>
+                            <td>{{ pcb.serial_number }}</td>
+                            <td>{{ pcb.batch.batch_number }}</td>
+                            <td>{{ pcb.batch.pcb_type.name }}</td>
+                            <td>{{ pcb.test_config.name|default:"No config" }}</td>
+                            <td>
+                                <span class="badge bg-{% if pcb.status == 'pending' %}secondary{% elif pcb.status == 'tested' %}warning{% elif pcb.status == 'qa_verified' %}success{% elif pcb.status == 'assembled' %}info{% else %}primary{% endif %}">
+                                    {{ pcb.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ pcb.created_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'pcb_detail' pcb.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ pcb.id }}">Edit</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ pcb.id }}">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if pcbs.has_other_pages %}
+            <nav aria-label="PCBs pagination">
+                <ul class="pagination justify-content-center">
+                    {% if pcbs.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ pcbs.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Previous</span>
+                        </li>
+                    {% endif %}
+
+                    {% for num in pcbs.paginator.page_range %}
+                        {% if pcbs.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if pcbs.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ pcbs.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Next</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <p class="text-muted">
+                {% if search_query %}
+                    No PCBs found matching your search criteria.
+                {% else %}
+                    No PCBs exist yet.
+                {% endif %}
+            </p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createModalLabel">Create New PCB</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="{{ form.serial_number.id_for_label }}" class="form-label">PCB Serial Number</label>
+                        {{ form.serial_number }}
+                        {% if form.serial_number.errors %}
+                            <div class="text-danger">{{ form.serial_number.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.batch.id_for_label }}" class="form-label">Batch</label>
+                        {{ form.batch }}
+                        {% if form.batch.errors %}
+                            <div class="text-danger">{{ form.batch.errors }}</div>
+                        {% endif %}
+                        {% if not form.batch.queryset %}
+                            <div class="text-warning mt-2">No batches available. Please create batches first from the Manage Batches page.</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.test_config.id_for_label }}" class="form-label">Test Configuration</label>
+                        {{ form.test_config }}
+                        {% if form.test_config.errors %}
+                            <div class="text-danger">{{ form.test_config.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">Notes</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                            <div class="text-danger">{{ form.notes.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create PCB</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modals -->
+{% for pcb in pcbs %}
+<div class="modal fade" id="editModal{{ pcb.id }}" tabindex="-1" aria-labelledby="editModalLabel{{ pcb.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel{{ pcb.id }}">Edit PCB: {{ pcb.serial_number }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="update" value="1">
+                <input type="hidden" name="pcb_id" value="{{ pcb.id }}">
+                
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_serial_number_{{ pcb.id }}" class="form-label">PCB Serial Number</label>
+                        <input type="text" class="form-control" id="edit_serial_number_{{ pcb.id }}" name="serial_number" value="{{ pcb.serial_number }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_batch_{{ pcb.id }}" class="form-label">Batch</label>
+                        <select class="form-select" id="edit_batch_{{ pcb.id }}" name="batch" required>
+                            {% for batch in form.batch.queryset %}
+                                <option value="{{ batch.id }}" {% if batch.id == pcb.batch.id %}selected{% endif %}>{{ batch.batch_number }} ({{ batch.pcb_type.name }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_test_config_{{ pcb.id }}" class="form-label">Test Configuration</label>
+                        <select class="form-select" id="edit_test_config_{{ pcb.id }}" name="test_config">
+                            <option value="">No test configuration</option>
+                            {% for test_config in form.test_config.queryset %}
+                                <option value="{{ test_config.id }}" {% if test_config.id == pcb.test_config.id %}selected{% endif %}>{{ test_config.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_notes_{{ pcb.id }}" class="form-label">Notes</label>
+                        <textarea class="form-control" id="edit_notes_{{ pcb.id }}" name="notes" rows="3">{{ pcb.notes|default:"" }}</textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_status_{{ pcb.id }}" class="form-label">Status</label>
+                        <select class="form-select" id="edit_status_{{ pcb.id }}" name="status">
+                            {% for value, display in pcb.STATUS_CHOICES %}
+                                <option value="{{ value }}" {% if value == pcb.status %}selected{% endif %}>{{ display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update PCB</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modals -->
+<div class="modal fade" id="deleteModal{{ pcb.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ pcb.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel{{ pcb.id }}">Delete PCB</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="delete" value="1">
+                <input type="hidden" name="pcb_id" value="{{ pcb.id }}">
+                
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the PCB "<strong>{{ pcb.serial_number }}</strong>"?</p>
+                    <p class="text-danger">This action cannot be undone.</p>
+                    {% if pcb.measurements.count > 0 or pcb.attachments.count > 0 or pcb.modules.count > 0 %}
+                    <p class="text-warning">
+                        Warning: This PCB has associated data:
+                        {% if pcb.measurements.count > 0 %}{{ pcb.measurements.count }} measurements, {% endif %}
+                        {% if pcb.attachments.count > 0 %}{{ pcb.attachments.count }} attachments, {% endif %}
+                        {% if pcb.modules.count > 0 %}{{ pcb.modules.count }} modules{% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete PCB</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

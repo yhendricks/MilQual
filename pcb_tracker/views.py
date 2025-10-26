@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import HttpResponseForbidden
 from django.core.exceptions import PermissionDenied
+from django.db import models
 from .models import PCB, Batch, TestMeasurement, FileAttachment, Module, ModuleTestRecord, PCBType, TestConfig, TestParameter, TestQuestion, ParameterMeasurement, QuestionResponse
 from .forms import PCBTestForm, FileAttachmentForm, ModuleAssemblyForm, ModuleTestForm, PCBCreateForm, BatchCreateForm, PCBTypeForm, TestConfigForm, TestParameterForm, TestQuestionForm
 
@@ -413,27 +414,87 @@ def pcb_detail(request, pcb_id):
     return render(request, 'pcb_tracker/pcb_detail.html', context)
 
 
+def user_can_manage_pcb(user):
+    """Check if user can manage PCBs"""
+    return user.groups.filter(name='pcb_manager').exists() or user.is_staff or is_manager(user)
+
+
 @login_required
-@user_passes_test(is_manager)  # Only managers can create new PCBs
-def pcb_create(request):
-    """View for managers to create new PCB entries"""
+@user_passes_test(user_can_manage_pcb)
+def pcb_manage(request):
+    """View for managing PCB entries with CRUD operations and search/pagination"""
+    # Handle form submission for creating/updating/deleting PCBs
     if request.method == 'POST':
-        form = PCBCreateForm(request.POST)
-        if form.is_valid():
-            pcb = form.save()
-            messages.success(request, f'PCB {pcb.serial_number} created successfully!')
-            return redirect('pcb_create')
+        if 'update' in request.POST:
+            # Handle updating an existing PCB
+            pcb_id = request.POST.get('pcb_id')
+            pcb = get_object_or_404(PCB, id=pcb_id)
+            
+            # Update PCB fields
+            pcb.serial_number = request.POST.get('serial_number', pcb.serial_number)
+            pcb.batch_id = request.POST.get('batch', pcb.batch_id)
+            
+            # Handle test_config (can be None)
+            test_config_id = request.POST.get('test_config')
+            if test_config_id:
+                pcb.test_config_id = test_config_id
+            else:
+                pcb.test_config = None
+            
+            pcb.notes = request.POST.get('notes', pcb.notes)
+            pcb.status = request.POST.get('status', pcb.status)
+            
+            pcb.save()
+            messages.success(request, f'PCB {pcb.serial_number} updated successfully!')
+            return redirect('pcb_manage')
+            
+        elif 'delete' in request.POST:
+            # Handle deleting a PCB
+            pcb_id = request.POST.get('pcb_id')
+            pcb = get_object_or_404(PCB, id=pcb_id)
+            pcb_serial = pcb.serial_number
+            pcb.delete()
+            messages.success(request, f'PCB {pcb_serial} deleted successfully!')
+            return redirect('pcb_manage')
+            
+        else:
+            # Handle creating a new PCB
+            form = PCBCreateForm(request.POST)
+            if form.is_valid():
+                pcb = form.save()
+                messages.success(request, f'PCB {pcb.serial_number} created successfully!')
+                return redirect('pcb_manage')
+            else:
+                # If form is invalid, we'll display errors in the template
+                pass
     else:
         form = PCBCreateForm()
     
-    # Get all batches to show in the form
-    batches = Batch.objects.all()
+    # Handle search and pagination for displaying PCBs
+    search_query = request.GET.get('search', '')
+    
+    # Get all PCBs with optional search filtering
+    pcbs = PCB.objects.all().select_related('batch', 'batch__pcb_type', 'test_config').order_by('-created_at')
+    
+    if search_query:
+        pcbs = pcbs.filter(
+            models.Q(serial_number__icontains=search_query) |
+            models.Q(batch__batch_number__icontains=search_query) |
+            models.Q(batch__pcb_type__name__icontains=search_query) |
+            models.Q(test_config__name__icontains=search_query)
+        )
+    
+    # Add pagination
+    paginator = Paginator(pcbs, 20)  # Show 20 PCBs per page
+    page_number = request.GET.get('page')
+    pcbs_page = paginator.get_page(page_number)
     
     context = {
         'form': form,
-        'batches': batches,
+        'pcbs': pcbs_page,
+        'search_query': search_query,
     }
-    return render(request, 'pcb_tracker/pcb_create.html', context)
+    return render(request, 'pcb_tracker/pcb_manage.html', context)
 
 
 def user_in_test_config_group(user):

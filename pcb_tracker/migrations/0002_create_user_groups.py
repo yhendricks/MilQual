@@ -20,6 +20,7 @@ def create_user_groups(apps, schema_editor):
         {'name': 'Manager_lvl1', 'level': 1, 'department': 'Management', 'description': 'Level 1 Manager - Oversees operations and provides final sign-off'},
         {'name': 'Manager_lvl2', 'level': 2, 'department': 'Management', 'description': 'Level 2 Manager - Senior management with additional oversight capabilities'},
         {'name': 'test_config_manager', 'level': 2, 'department': 'Engineering', 'description': 'Test Configuration Manager - Manages test configurations and parameters'},
+        {'name': 'pcb_manager', 'level': 2, 'department': 'Production', 'description': 'PCB Manager - Manages PCBs with full CRUD permissions'},
         {'name': 'Admin', 'level': 99, 'department': 'Administration', 'description': 'System Administrator with full access'},
     ]
     
@@ -275,6 +276,19 @@ def create_user_groups(apps, schema_editor):
             # Can also view related models
             {'codename': 'view_pcbtype', 'content_type': pcb_type_content_type},
             {'codename': 'view_pcb', 'content_type': pcb_content_type},
+        ],
+        
+        'pcb_manager': [
+            # Full CRUD permissions for PCBs
+            {'codename': 'add_pcb', 'content_type': pcb_content_type},
+            {'codename': 'view_pcb', 'content_type': pcb_content_type},
+            {'codename': 'change_pcb', 'content_type': pcb_content_type},
+            {'codename': 'delete_pcb', 'content_type': pcb_content_type},
+            
+            # Can view related models
+            {'codename': 'view_batch', 'content_type': batch_content_type},
+            {'codename': 'view_testconfig', 'content_type': test_config_content_type},
+            {'codename': 'view_pcbtype', 'content_type': pcb_type_content_type},
         ],
     }
     

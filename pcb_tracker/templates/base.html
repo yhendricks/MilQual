@@ -66,6 +66,11 @@
                                         <li><a class="dropdown-item" href="{% url 'test_config_manage' %}">Manage Test Configurations</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                     {% endif %}
+                                    
+                                    {% if group.name == 'pcb_manager' %}
+                                        <li><a class="dropdown-item" href="{% url 'pcb_manage' %}">Manage PCBs</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                    {% endif %}
                                 {% endfor %}
                                 
                                 <!-- Show Sign Off only to managers -->

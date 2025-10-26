@@ -171,50 +171,71 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="id_name" class="form-label">Parameter Name</label>
+                        <label for="{{ parameter_form.name.id_for_label }}" class="form-label">Parameter Name</label>
                         {{ parameter_form.name }}
+                        {% if parameter_form.name.errors %}
+                            <div class="text-danger">{{ parameter_form.name.errors }}</div>
+                        {% endif %}
                     </div>
                     
                     <div class="mb-3">
-                        <label for="id_parameter_type" class="form-label">Parameter Type</label>
+                        <label for="{{ parameter_form.parameter_type.id_for_label }}" class="form-label">Parameter Type</label>
                         {{ parameter_form.parameter_type }}
+                        {% if parameter_form.parameter_type.errors %}
+                            <div class="text-danger">{{ parameter_form.parameter_type.errors }}</div>
+                        {% endif %}
                     </div>
                     
                     <div class="mb-3">
-                        <label for="id_description" class="form-label">Description</label>
+                        <label for="{{ parameter_form.description.id_for_label }}" class="form-label">Description</label>
                         {{ parameter_form.description }}
+                        {% if parameter_form.description.errors %}
+                            <div class="text-danger">{{ parameter_form.description.errors }}</div>
+                        {% endif %}
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="id_min_value" class="form-label">Minimum Value</label>
+                                <label for="{{ parameter_form.min_value.id_for_label }}" class="form-label">Minimum Value</label>
                                 {{ parameter_form.min_value }}
+                                {% if parameter_form.min_value.errors %}
+                                    <div class="text-danger">{{ parameter_form.min_value.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="id_max_value" class="form-label">Maximum Value</label>
+                                <label for="{{ parameter_form.max_value.id_for_label }}" class="form-label">Maximum Value</label>
                                 {{ parameter_form.max_value }}
+                                {% if parameter_form.max_value.errors %}
+                                    <div class="text-danger">{{ parameter_form.max_value.errors }}</div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="id_unit" class="form-label">Unit</label>
+                        <label for="{{ parameter_form.unit.id_for_label }}" class="form-label">Unit</label>
                         {{ parameter_form.unit }}
+                        {% if parameter_form.unit.errors %}
+                            <div class="text-danger">{{ parameter_form.unit.errors }}</div>
+                        {% endif %}
                     </div>
                     
                     <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="id_required" name="required">
-                        <label class="form-check-label" for="id_required">
+                        <input class="form-check-input" type="checkbox" id="{{ parameter_form.required.id_for_label }}" name="required" {% if parameter_form.required.value %}checked{% endif %}>
+                        <label class="form-check-label" for="{{ parameter_form.required.id_for_label }}">
                             Required Parameter
                         </label>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="id_order" class="form-label">Display Order</label>
+                        <label for="{{ parameter_form.order.id_for_label }}" class="form-label">Display Order</label>
                         {{ parameter_form.order }}
+                        {% if parameter_form.order.errors %}
+                            <div class="text-danger">{{ parameter_form.order.errors }}</div>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -239,20 +260,26 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="id_question_text" class="form-label">Question Text</label>
+                        <label for="{{ question_form.question_text.id_for_label }}" class="form-label">Question Text</label>
                         {{ question_form.question_text }}
+                        {% if question_form.question_text.errors %}
+                            <div class="text-danger">{{ question_form.question_text.errors }}</div>
+                        {% endif %}
                     </div>
                     
                     <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="id_required_question" name="required">
-                        <label class="form-check-label" for="id_required_question">
+                        <input class="form-check-input" type="checkbox" id="{{ question_form.required.id_for_label }}" name="required" {% if question_form.required.value %}checked{% endif %}>
+                        <label class="form-check-label" for="{{ question_form.required.id_for_label }}">
                             Required Question
                         </label>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="id_order_question" class="form-label">Display Order</label>
+                        <label for="{{ question_form.order.id_for_label }}" class="form-label">Display Order</label>
                         {{ question_form.order }}
+                        {% if question_form.order.errors %}
+                            <div class="text-danger">{{ question_form.order.errors }}</div>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="modal-footer">

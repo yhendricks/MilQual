@@ -44,7 +44,10 @@ def can_verify_module(user):
 
 def is_manager(user):
     """Check if user is a manager"""
-    return user_in_group(user, ['Manager_lvl1', 'Manager_lvl2'])
+    # Check for new specific management groups or legacy manager groups
+    return (user_in_group(user, ['pcb_manager', 'batch_manager', 'test_config_manager', 'manage_pcb_type']) or 
+            user_in_group(user, ['Manager_lvl1', 'Manager_lvl2']) or
+            user.is_staff)
 
 
 def can_view_production_summary(user):
@@ -73,8 +76,8 @@ def dashboard(request):
         pcb_count = pcb_pending = pcb_tested = pcb_qa_verified = 0
         module_count = modules_assembled = modules_functional_tested = 0
     
-    # Get batches for managers
-    batches = Batch.objects.all() if is_manager(request.user) else Batch.objects.none()
+    # Get batches for managers or users with batch management permissions
+    batches = Batch.objects.all() if user_in_group(request.user, ['batch_manager', 'pcb_manager']) or request.user.is_staff else Batch.objects.none()
     
     context = {
         'pcb_count': pcb_count,

@@ -10,11 +10,7 @@ def create_user_groups(apps, schema_editor):
     # Define the groups to create
     groups_config = [
         {'name': 'pcb_testing', 'level': 1, 'department': 'Testing', 'description': 'PCB Testing - Tests individual PCBs'},
-        {'name': 'assembler_lvl1', 'level': 1, 'department': 'Assembly', 'description': 'Level 1 Assembler - Assembles PCBs into modules'},
-        {'name': 'QA_lvl1', 'level': 1, 'department': 'Quality Assurance', 'description': 'Level 1 Quality Assurance - Verifies test results and approves for next stage'},
-        {'name': 'QA_lvl2', 'level': 2, 'department': 'Quality Assurance', 'description': 'Level 2 Quality Assurance - Advanced QA with additional permissions'},
-        {'name': 'Function_tester_lvl1', 'level': 1, 'department': 'Testing', 'description': 'Level 1 Functional Tester - Tests modules for functionality'},
-        {'name': 'Function_tester_lvl2', 'level': 2, 'department': 'Testing', 'description': 'Level 2 Functional Tester - Advanced functional testing'},
+
         {'name': 'Environmental_tester_lvl1', 'level': 1, 'department': 'Testing', 'description': 'Level 1 Environmental Tester - Performs environmental testing on modules'},
         {'name': 'Manager_lvl1', 'level': 1, 'department': 'Management', 'description': 'Level 1 Manager - Oversees operations and provides final sign-off'},
         {'name': 'Manager_lvl2', 'level': 2, 'department': 'Management', 'description': 'Level 2 Manager - Senior management with additional oversight capabilities'},
@@ -85,48 +81,11 @@ def create_user_groups(apps, schema_editor):
         ],
         
 
-        'assembler_lvl1': [
-            # Can view PCBs (only approved ones)
-            {'codename': 'view_pcb', 'content_type': pcb_content_type},
-            
-            # Can create and view modules
-            {'codename': 'add_module', 'content_type': module_content_type},
-            {'codename': 'view_module', 'content_type': module_content_type},
-        ],
+
         
-        'QA_lvl1': [
-            # Can view PCBs and change status
-            {'codename': 'view_pcb', 'content_type': pcb_content_type},
-            {'codename': 'change_pcb', 'content_type': pcb_content_type},
-            
-            # Can view test measurements
-            {'codename': 'view_testmeasurement', 'content_type': test_measurement_content_type},
-            
-            # Can view and add file attachments
-            {'codename': 'view_fileattachment', 'content_type': file_attachment_content_type},
-            {'codename': 'add_fileattachment', 'content_type': file_attachment_content_type},
-        ],
+
         
-        'QA_lvl2': [
-            # Same as QA_lvl1 but with additional permissions
-            {'codename': 'add_pcb', 'content_type': pcb_content_type},
-            {'codename': 'view_pcb', 'content_type': pcb_content_type},
-            {'codename': 'change_pcb', 'content_type': pcb_content_type},
-            {'codename': 'delete_pcb', 'content_type': pcb_content_type},
-            
-            {'codename': 'add_testmeasurement', 'content_type': test_measurement_content_type},
-            {'codename': 'view_testmeasurement', 'content_type': test_measurement_content_type},
-            {'codename': 'change_testmeasurement', 'content_type': test_measurement_content_type},
-            {'codename': 'delete_testmeasurement', 'content_type': test_measurement_content_type},
-            
-            {'codename': 'add_fileattachment', 'content_type': file_attachment_content_type},
-            {'codename': 'view_fileattachment', 'content_type': file_attachment_content_type},
-            {'codename': 'delete_fileattachment', 'content_type': file_attachment_content_type},
-            
-            {'codename': 'add_module', 'content_type': module_content_type},
-            {'codename': 'view_module', 'content_type': module_content_type},
-            {'codename': 'change_module', 'content_type': module_content_type},
-        ],
+
         
         'Manager_lvl2': [
             # Can view and change everything including PCB types
@@ -145,31 +104,9 @@ def create_user_groups(apps, schema_editor):
             {'codename': 'view_fileattachment', 'content_type': file_attachment_content_type},
         ],
         
-        'Function_tester_lvl1': [
-            # Can view modules
-            {'codename': 'view_module', 'content_type': module_content_type},
-            
-            # Can create and view module test records
-            {'codename': 'add_moduletestrecord', 'content_type': module_test_record_content_type},
-            {'codename': 'view_moduletestrecord', 'content_type': module_test_record_content_type},
-            
-            # Can add and view file attachments
-            {'codename': 'add_fileattachment', 'content_type': file_attachment_content_type},
-            {'codename': 'view_fileattachment', 'content_type': file_attachment_content_type},
-        ],
+
         
-        'Function_tester_lvl2': [
-            # Same as lvl1 with additional permissions
-            {'codename': 'view_module', 'content_type': module_content_type},
-            {'codename': 'change_module', 'content_type': module_content_type},
-            
-            {'codename': 'add_moduletestrecord', 'content_type': module_test_record_content_type},
-            {'codename': 'view_moduletestrecord', 'content_type': module_test_record_content_type},
-            {'codename': 'change_moduletestrecord', 'content_type': module_test_record_content_type},
-            
-            {'codename': 'add_fileattachment', 'content_type': file_attachment_content_type},
-            {'codename': 'view_fileattachment', 'content_type': file_attachment_content_type},
-        ],
+
         
         'Environmental_tester_lvl1': [
             # Can view modules
@@ -299,8 +236,7 @@ def reverse_create_user_groups(apps, schema_editor):
     
     # Delete the groups we created
     group_names = [
-        'pcb_testing', 'assembler_lvl1',
-        'QA_lvl1', 'QA_lvl2', 'Function_tester_lvl1', 'Function_tester_lvl2',
+        'pcb_testing',
         'Environmental_tester_lvl1', 'Manager_lvl1', 'Manager_lvl2', 'Admin'
     ]
     

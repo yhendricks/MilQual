@@ -14,9 +14,7 @@ A Django application for tracking PCBs through a multi-stage quality testing wor
 ## User Groups and Permissions
 
 - `pcb_testing` - Test individual PCBs
-- `assembler_lvl1` - Assemble PCBs into modules
-- `QA_lvl1` / `QA_lvl2` - Verify test results and approve
-- `Function_tester_lvl1` / `Function_tester_lvl2` - Test modules functionally
+
 - `Environmental_tester_lvl1` - Perform environmental testing
 - `Manager_lvl1` / `Manager_lvl2` - Review and sign off completed modules
 - `Admin` - Full system access

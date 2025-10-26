@@ -23,23 +23,22 @@ def can_test_pcb(user):
 
 def can_verify_pcb(user):
     """Check if user can verify PCBs (QA groups)"""
-    return user_in_group(user, ['QA_lvl1', 'QA_lvl2'])
+    return user_in_group(user, [])
 
 
 def can_assemble_module(user):
     """Check if user can assemble modules (assembler groups)"""
-    return user_in_group(user, ['assembler_lvl1'])
+    return user_in_group(user, [])
 
 
 def can_test_module(user):
     """Check if user can perform module tests (functional/environmental tester groups)"""
-    return user_in_group(user, ['Function_tester_lvl1', 'Function_tester_lvl2', 
-                                'Environmental_tester_lvl1'])
+    return user_in_group(user, ['Environmental_tester_lvl1'])
 
 
 def can_verify_module(user):
     """Check if user can verify module tests (QA groups)"""
-    return user_in_group(user, ['QA_lvl1', 'QA_lvl2'])
+    return user_in_group(user, [])
 
 
 def is_manager(user):

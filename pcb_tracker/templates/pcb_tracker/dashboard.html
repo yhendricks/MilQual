@@ -35,7 +35,7 @@
                         <td>{{ batch.pcbs.count }}</td>
                         <td>{{ batch.production_date|date:"M d, Y H:i" }}</td>
                         <td>
-                            <a href="{% url 'pcb_create' %}" class="btn btn-sm btn-primary">Add PCBs</a>
+                            <a href="{% url 'pcb_manage' %}" class="btn btn-sm btn-primary">Manage PCBs</a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -117,7 +117,7 @@
                 {% if 'Manager' in group.name %}
                     <a href="{% url 'module_sign_off' %}" class="btn btn-primary">Sign Off Modules</a>
                     <a href="{% url 'batch_manage' %}" class="btn btn-primary">Manage Batches</a>
-                    <a href="{% url 'pcb_create' %}" class="btn btn-primary">Create PCB</a>
+                    <a href="{% url 'pcb_manage' %}" class="btn btn-primary">Manage PCBs</a>
                 {% endif %}
             {% endfor %}
         </div>
